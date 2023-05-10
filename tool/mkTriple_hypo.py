@@ -89,7 +89,8 @@ determinated_way_text = {
 
 base_dir = '/Users/hiroki_u/Documents/git/earthquake-ontology' # 後で消す or .env とconfig.envの形式にする
 data_dir = 'data'
-shindo_dir = 'JMA/地震月報_震度'
+jma_dir = 'JMA'
+shindo_dir = '地震月報_震度'
 #filename = 'i2019.dat'
 
 #filename = 'jma-earthquake-named.tsv'
@@ -188,15 +189,28 @@ def intensity_obs(input) :
     return input
 
 def fmt_id_datetime(input) :
+    #print(f"Function datetime ： {input['second']}")
+
+
     # レコード部分をフォーマットとして利用
     #input.id = input["recode"].str + input["year"].str + input["month"].str + input["day"].str + input["hour"].str + input["minute"].str + input["second"].str
+    #input.id = input["recode"] + input["year"] + str(input["month"]).zfill(2) + str(input["day"]).zfill(2) + str(input["hour"]).zfill(2) + str(input["minute"]).zfill(2) + str(input["second"]).ljust(4,'0')
     input.id = input["recode"] + input["year"] + input["month"] + input["day"] + input["hour"] + input["minute"] + input["second"]
+
     # 日付時刻を変換
     # YYYY-MM-DDThh:mm:ssZ
-    input.datetime = input["year"].astype(object) + input["month"].astype(object) + input["day"].astype(object) + input["hour"].astype(object) + input["minute"].astype(object) + input["second"].astype(object).str[0:2] + "+9:00"
+    # _millisec = str(input["second"].astype(object).str[0:2])
+    # if re.match(r'^[0-9] $', _millisec) :
+    #     _millisec = str(input["second"].astype(object).str[0:1]) + '0'
+    # input.datetime = input["year"].astype(object) + str(input["month"].astype(object)).zfill(2) + str(input["day"].astype(object)).zfill(2) + str(input["hour"].astype(object)).zfill(2) + str(input["minute"].astype(object)).zfill(2) + str(input["second"].astype(object).str[0:2]).ljust(2, '0') + "+9:00"
     #input.datetime = datetime.strptime(str(input['datetime'].str), '%Y%m%d%H%M%S').isoformat()
-    input.datetime = pd.to_datetime(input["datetime"])
+    #input.datetime = pd.to_datetime(input["datetime"])
     #input.datetime = input["datetime"].tz_localize('Asia/Tokyo')
+    #_millisec = str(input["second"].astype(object).str[0:2])
+    #print(_millisec)
+    #if re.match(r'[0-9][^0-9]', _millisec) :
+    #    _millisec = input["second"].astype(object).str[0:1] + '0'
+    #input.datetime = pd.to_datetime(input["year"] + input["month"] + input["day"] + input["hour"] + input["minute"] + input["second"].str[0:2] + "+9:00", errors='ignore')
 
     #input['datetime'].str.cat([input["year"].str, input["month"].str, input["day"].str, input["hour"].str, input["minute"].str,input["second"].str])
     #_time = datetime.strptime(input["year"].str+input["month"].str+input["day"].str+input["hour"].str+input["minute"].str+input["second"].str,'%Y%m%d%H%M%S')
@@ -226,6 +240,9 @@ def convert_JMA_stationList():
                 print('    schema:availabilityStarts "' + cols[6] + '" .')
             print()
 
+#---
+# 気象庁のcode_pファイルを変換
+#---
 def convert_JMA_code_p():
     with open(os.path.join(base_dir,data_dir,filename), encoding='sjis', newline='') as f:
         reader = csv.reader(f, delimiter='\t')
@@ -248,6 +265,9 @@ def convert_JMA_code_p():
                 print('    schema:availabilityStarts "' + cols[4] + '" .')
             print()
 
+#---
+# 気象庁の震源リストを変換
+#---
 def convert_JMA_hypo_list(_df):
     hypo_data = os.path.join(base_dir,data_dir,filename)
     # 固定長データに分割
@@ -277,20 +297,10 @@ def convert_JMA_hypo_list(_df):
     #print(df2.applymap(convert_JMA_hypo_list))
     #print(map(convert_JMA_hypo_list, df2))
 
-###
-# 震度データの震源
-###
-def convert_JMA_i_hypo2ttl(input) :
-    #_ttl = "<https://seismic.balog.jp/resource/" + input["id"].str + "> a jpe:hypocenter .\n"
-    #_ttl += '    skos:prefLabel "' + input["hypo_locale"].str + '"@ja ;\n'
-    #_ttl += '    skos:altLabel "' + input["hypo_locale"].str + '"@ja ;\n'
-    #_ttl += '    jpe:originTime "' + input["datetime"].str + '" ;\n'
-    #_ttl += input["latitude_deg"].where(input["latitude_deg"].notnull() , '    schema:latitude ' + input["latitude_deg"].str + ' ;\n')
-    #_ttl += '    schema:longitude ' + input["longitude_deg"].astype(object) + ' ;\n'
-    #_ttl += '    jpe:magnitude ' + input["mag1_1"].astype(object) + ' ;\n'
-    #_ttl += '    jpe:depth "' + input["depth"].astype(object) + ' ;\n'
-    #_ttl += '    jpe:calcShindo "' + input["max_coefficient"].astype(object) + ' ;\n'
-
+#---
+# 震源レコードをトリプルに変換
+#---
+def _convert_JMA_i_hypo2ttl(input) :
     ttl_list = []
     for i, row in input.iterrows():
         _ttl = "<https://seismic.balog.jp/resource/" + str(row.id) + "> a jpe:hypocenter ;\n"
@@ -329,46 +339,54 @@ def convert_JMA_i_hypo2ttl(input) :
             _ttl += '    jpe:withTravelTimeTable "' + travel_time_table[0] + '" ;\n'
         if row.obs_number != nan and row['obs_number'] != ' ':
             _ttl += '    jpe:observedStationNum ' + str(row.obs_number).replace(" ",'') + ' ;\n'
-        _ttl += '    jpe:depth ' + str(row.depth) + ' .\n'
+        _ttl += '    jpe:depth ' + str(row.depth * 1000.0) + ' .\n'
+        _ttl += '\n'
         #print(_ttl)
         ttl_list.append(_ttl)
 
     return ttl_list
 
-###
-# 震度データの観測波形
-###
-def convert_JMA_i_obs2ttl(input) :
+#---
+# 観測レコードをトリプルに変換
+#---
+def _convert_JMA_i_obs2ttl(input) :
     ttl_list = []
     for i, row in input.iterrows():
         _ttl = "<https://seismic.balog.jp/resource/" + str(row.obs_id) + "-" + str(row.hypo_id) + "> a jpe:observedWave ;\n"
         _ttl += '    schema:startTime "' + str(row.startTime) + '" ;\n' # 日付時刻の型を決める
         if row.max_coefficient != nan :
-            _ttl += '    jpe:Shindo ' + str(row.max_coefficient) + ' ;\n'
+            _ttl += '    jpe:shindo ' + str(row.max_coefficient) + ' ;\n'
         if row.calcShindo != nan :
             _ttl += '    jpe:calcShindo ' + str(row.calcShindo)[0] + "." + str(row.calcShindo)[1] + ' ;\n'
         _ttl += '    jpe:hasHypocenter <https://seismic.balog.jp/resource/' + str(row.hypo_id) + '> ;\n'
         _ttl += '    jpe:observedBy <https://seismic.balog.jp/resource/sta-' + str(row.obs_id) + '> .\n'
+        _ttl += '\n'
         #print(_ttl)
         ttl_list.append(_ttl)
 
     return ttl_list
 
-def convert_JMA_i_obs(_filename) :
+#---
+# 震度データ(i{Year}.dat)からトリプルを作成
+# 内部には、震源レコードと観測レコードがあるため、それぞれをデータフレームに変換してから処理
+#---
+def convert_JMA_i(_filename) :
     df = pd.DataFrame(columns=fixed_i_hypo_names)
     df_obs = pd.DataFrame(columns=fixed_i_obs_names)
     record = ['' for k in range(len(fixed_i_hypo_width))]
     record_obs = ['' for k in range(len(fixed_i_obs_width))]
 
-    with open(os.path.join(base_dir,data_dir,shindo_dir,_filename), encoding='sjis', newline='') as f:
+    with open(os.path.join(base_dir,data_dir,jma_dir,shindo_dir,_filename), encoding='sjis', newline='') as f:
         reader = f.readlines()
         _hypo_id = ''
         obs_num = 1
         for line in reader :
+            #print(f"読み込んだ1行：{line}")
             if re.match("[ABD]",str(line[0:1])) :
+                #print("震源レコード処理")
                 if obs_num == 0 :
                     continue
-                #print(line)
+                # print(line)
                 # 地震のIDとして最初のレコードをセット
                 _hypo_id = line[0:17]
                 obs_num = 0
@@ -378,13 +396,25 @@ def convert_JMA_i_obs(_filename) :
                     record[k] = line[pos:pos+fixed_i_hypo_width[k]]
                     pos = pos + fixed_i_hypo_width[k]
                     #print(record[k])
+                #print(record)
+                record[-2] = _hypo_id
+                #print(record)
+                # 最後のカラムに日付時刻
+                _millisec = str(record[6][0:2])
+                #print(_millisec)
+                if re.match(r'^[0-9] $', _millisec) :
+                    _millisec = record[6][0:1] + '0'
+                #print(record)
+                record[-1] = pd.to_datetime(record[1] + str(record[2]).zfill(2) + str(record[3]).zfill(2) + str(record[4]).zfill(2) + str(record[5]).zfill(2) + _millisec + "+9:00", errors='ignore')
+                #print(record)
                 # 1行ずつ df に追加する
                 df = df.append(pd.Series(record, index=df.columns), ignore_index=True)
                 last_obs_num = int(line[-7:-3])
             else :
+                #print("震度（shindo）レコード処理")
                 obs_num += 1
                 #print(_hypo_id)
-                #print(line)
+                # print(line)
                 pos = 0 # 各行の実質データはPython でいう0、ふつうにいえば1文字めからはじまる
                 # 要素ごとに record に入れる
                 for k in range(len(fixed_i_obs_width)):
@@ -393,55 +423,82 @@ def convert_JMA_i_obs(_filename) :
                     #print(record_obs[k])
                     if pos > len(line) :
                         break
+                #print(record_obs)
                 # 最後のカラムに震源を追加
                 record_obs[-2] = _hypo_id
+                #print(record_obs)
                 # 最後のカラムに日付時刻
-                record_obs[-1] = pd.to_datetime(_hypo_id[1:7] + record_obs[2] + record_obs[3] + record_obs[4] + record_obs[5][0:2] + "+9:00")
+                _millisec = str(record_obs[5][0:2])
+                # print(_millisec)
+                if re.match(r'^[0-9] $', _millisec) :
+                    _millisec = record_obs[5][0:1] + '0'
+                record_obs[-1] = pd.to_datetime(_hypo_id[1:7] + str(record_obs[2]).zfill(2) + str(record_obs[3]).zfill(2) + str(record_obs[4]).zfill(2) + _millisec + "+9:00", errors='ignore')
+                #record_obs[-1] = pd.to_datetime(_hypo_id[1:7] + record_obs[2].zfill(2) + record_obs[3] + record_obs[4] + str(record_obs[5][0:2]).ljust(2, '0') + "+9:00")
+                # print(record_obs)
                 # 1行ずつ df に追加する
                 df_obs = df_obs.append(pd.Series(record_obs, index=df_obs.columns), ignore_index=True)
 
     print(df)
     print(df_obs)
     # 型を変更する
+    print("error 型")
     df = convert(df)
     # 度分を直す
+    print("error 度分")
     df = degree(df)
     # マグニチュードを直す
+    print("error magnitude")
     df = magnitude(df)
     # 秒を直す
     #df = minute(df)
     # 深さを直す
+    print("error depth")
     df = depth(df)
     # 震央地名、観測点数、震源決定フラグを修正
+    print("error intensity")
     df = intensity_obs(df)
     # 日付時刻を治す
-    df = fmt_id_datetime(df)
+    #print("error datetime")
+    #df = fmt_id_datetime(df)
     # FAR FIELDは削除する
+    print("error FAR FIELD")
     df = df[df.hypo_locale != "FAR FIELD"]
     # 出力
+    print("error output round")
     df2 = df.round(4)
     df2 = df2.drop(columns=['latitude_min','longitude_min', 'mag1_2'])
     #print(df2)
 
-    i_hypo_ttl = convert_JMA_i_hypo2ttl(df2)
-    i_obs_ttl = convert_JMA_i_obs2ttl(df_obs)
+    # 震源レコードをトリプルに変換
+    i_hypo_ttl = _convert_JMA_i_hypo2ttl(df2)
+    # 観測レコードをトリプルに変換
+    i_obs_ttl = _convert_JMA_i_obs2ttl(df_obs)
 
-    with open(os.path.join(base_dir,data_dir,shindo_dir,_filename+'_i.ttl'), 'w') as f:
+    with open(os.path.join(base_dir,data_dir,jma_dir,_filename+'_i.ttl'), 'w') as f:
         f.writelines(prefix_text)
         f.writelines(i_hypo_ttl)
 
-    with open(os.path.join(base_dir,data_dir,shindo_dir,_filename+'_i_obs.ttl'), 'w') as f:
+    with open(os.path.join(base_dir,data_dir,jma_dir,_filename+'_i_obs.ttl'), 'w') as f:
         f.writelines(prefix_text)
         f.writelines(i_obs_ttl)
 
 if __name__ == "__main__":
 
+    # 観測点一覧を変換
     #convert_JMA_code_p()
 
-    filename = 'i2019.dat'
-    #for i in [9,8,7] :
-    for i in [6,5,4,3,2] :
-    #for i in [6,5,4,3,2,1,0] :
-        filename = 'i201' + str(i) + '.dat'
+    # TEST
+    filename = 'test_i2019.dat'
+    #convert_JMA_i(filename)
+
+    #for i in range(1970, 2020) :
+    for i in range(1982, 2020) :
+        filename = 'i' + str(i) + '.dat'
         print(filename)
-        convert_JMA_i_obs(filename)
+        try:
+            convert_JMA_i(filename)
+        except ValueError :
+            print(f"Error {filename} ： {ValueError}")
+            sys.exit(1)
+
+
