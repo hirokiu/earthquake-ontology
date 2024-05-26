@@ -318,13 +318,13 @@ def _convert_JMA_i_hypo2ttl(input) :
                 _ttl += '    schema:longitude ' + str(row.longitude_deg) + '.' + str(row.longitude_min) + ' ;\n'
             else :
                 _ttl += '    schema:longitude ' + str(row.longitude_deg) + ' ;\n'
-        if 'mag1_1' in row :
-            if 'mag1_2' in row :
+        if 'mag1_1' in row and row.mag1_1 is not nan and str(row.mag1_1) != 'nan':
+            if 'mag1_2' in row and row.mag1_2 is not nan and str(row.mag1_2) != 'nan':
                 _ttl += '    jpe:magnitude ' + str(row.mag1_1) + '.' + str(row.mag1_2) + ' ;\n'
             else :
                 _ttl += '    jpe:magnitude ' + str(row.mag1_1) + ' ;\n'
-        if 'mag2_1' in row :
-            if 'mag2_2' in row :
+        if 'mag2_1' in row and row.mag2_1 is not nan and str(row.mag2_1) != 'nan':
+            if 'mag2_2' in row and row.mag2_2 is not nan and str(row.mag2_2) != 'nan':
                 _ttl += '    jpe:magnitude ' + str(row.mag2_1) + '.' + str(row.mag2_2) + ' ;\n'
             else :
                 _ttl += '    jpe:magnitude ' + str(row.mag2_1) + ' ;\n'
@@ -351,10 +351,13 @@ def _convert_JMA_i_obs2ttl(input) :
     ttl_list = []
     for i, row in input.iterrows():
         _ttl = "<https://seismic.balog.jp/resource/" + str(row.obs_id) + "-" + str(row.hypo_id) + "> a jpe:observedWave ;\n"
-        _ttl += '    schema:startTime "' + str(row.startTime).strip() + '" ;\n' # 日付時刻の型を決める
+        if type(row.startTime) is str:
+            _ttl += '    schema:startTime ' + str(row.startTime) + ' ;\n' # 日付時刻の型を決める
+        else:
+            _ttl += '    schema:startTime ' + str(row.startTime.isoformat()) + ' ;\n' # 日付時刻の型を決める
         if row.max_coefficient != nan :
             _ttl += '    jpe:shindo ' + str(row.max_coefficient) + ' ;\n'
-        if row.calcShindo != nan :
+        if row.calcShindo != nan and re.match(r'[\.0-9]*$', row.calcShindo):
             _ttl += '    jpe:calcShindo ' + str(row.calcShindo)[0] + "." + str(row.calcShindo)[1] + ' ;\n'
         _ttl += '    jpe:hasHypocenter <https://seismic.balog.jp/resource/' + str(row.hypo_id) + '> ;\n'
         _ttl += '    jpe:observedBy <https://seismic.balog.jp/resource/sta-' + str(row.obs_id) + '> .\n'
@@ -401,15 +404,28 @@ def convert_JMA_i(_filename) :
                 #print(record)
                 record[-2] = _hypo_id
                 #print(record)
-                # 最後のカラムに日付時刻
-                _millisec = str(record[6][0:2])
-                #print(_millisec)
-                if re.match(r'^[0-9] $', _millisec) :
-                    _millisec = record[6][0:1] + '0'
-                #print(record)
-                record[-1] = pd.to_datetime(record[1] + str(record[2]).zfill(2) + str(record[3]).zfill(2) + str(record[4]).zfill(2) + str(record[5]).zfill(2) + _millisec, errors='ignore').tz_localize('Asia/Tokyo').tz_convert('UTC')
-                # print(record)
 
+                ###
+                # 最後のカラムに日付時刻を追加
+                # TODO:欠測データのチェック
+                # 日付 or 時刻が欠測の場合は文字列に変換
+                # それ以外は0で埋める
+                ###
+                if re.match(r'^[0-9]*$', record[2]) and re.match(r'^[0-9]*$', record[3]) and re.match(r'^[0-9]*$', record[4]) :
+                    if not( re.match(r'^[0-9]*$', record_obs[5]) ) :
+                        record_obs[4] = 0
+
+                    # ミリ秒を取得
+                    _millisec = str(record[6][0:2])
+                    if re.match(r'^[0-9] $', _millisec) :
+                        _millisec = record[6][0:1] + '0'
+
+                    record[-1] = pd.to_datetime(record[1] + str(record[2]).zfill(2) + str(record[3]).zfill(2) + str(record[4]).zfill(2) + str(record[5]).zfill(2) + _millisec, errors='ignore').tz_localize('Asia/Tokyo').tz_convert('UTC')
+
+                else :
+                    record_obs[-1] = str('"' + record[1] + str(record[2]) + str(record[3]) + str(record[4]) + '// 欠測"')
+
+                # print(record)
                 _dataFrame.append(record)
 
                 last_obs_num = int(line[-7:-3])
@@ -420,6 +436,7 @@ def convert_JMA_i(_filename) :
                 obs_num += 1
                 #print(_hypo_id)
                 #print(line)
+
                 pos = 0 # 各行の実質データはPythonでいう0、ふつうにいえば1文字めからはじまる
                 # 要素ごとに record に入れる
                 for k in range(len(fixed_i_obs_width)):
@@ -428,18 +445,31 @@ def convert_JMA_i(_filename) :
                     #print(record_obs[k])
                     if pos > len(line) :
                         break
-                #print(record_obs)
+
                 # 最後のカラムに震源を追加
                 record_obs[-2] = _hypo_id
-                #print(record_obs)
-                # 最後のカラムに日付時刻
-                _millisec = str(record_obs[5][0:2])
-                # print(_millisec)
-                if re.match(r'^[0-9] $', _millisec) :
-                    _millisec = record_obs[5][0:1] + '0'
-                record_obs[-1] = pd.to_datetime(_hypo_id[1:7] + str(record_obs[2]).zfill(2) + str(record_obs[3]).zfill(2) + str(record_obs[4]).zfill(2) + _millisec, errors='ignore').tz_localize('Asia/Tokyo').tz_convert('UTC')
-                #print(record_obs)
 
+                ###
+                # 最後のカラムに日付時刻を追加
+                # TODO:欠測データのチェック
+                # 日付 or 時刻が欠測の場合は文字列に変換
+                # それ以外は0で埋める
+                ###
+                if re.match(r'^[0-9]*$', record_obs[2]) and re.match(r'^[0-9]*$', record_obs[3]) :
+                    if not( re.match(r'^[0-9]*$', record_obs[4]) ) :
+                        record_obs[4] = 0
+
+                    # ミリ秒を取得
+                    _millisec = str(record_obs[5][0:2])
+                    # print(_millisec)
+                    if re.match(r'^[0-9] $', _millisec) :
+                        _millisec = record_obs[5][0:1] + '0'
+
+                    record_obs[-1] = pd.to_datetime(_hypo_id[1:7] + str(record_obs[2]).zfill(2) + str(record_obs[3]).zfill(2) + str(record_obs[4]).zfill(2) + _millisec, errors='ignore').tz_localize('Asia/Tokyo').tz_convert('UTC')
+                else :
+                    record_obs[-1] = str('"' + _hypo_id[1:7] + '// 欠測"')
+
+                #print(record_obs)
                 _dataFrame_obs.append(record_obs)
 
     df = pd.DataFrame(_dataFrame, columns=fixed_i_hypo_names)
@@ -496,17 +526,17 @@ if __name__ == "__main__":
     #convert_JMA_code_p()
 
     # TEST
-    filename = 'test_i2019.dat'
-    convert_JMA_i(filename)
+    #filename = 'test_i2019.dat'
+    #convert_JMA_i(filename)
 
-    #for i in range(1970, 2020) :
-    # for i in range(2020, 2022) :
-    #     filename = 'i' + str(i) + '.dat'
-    #     print(filename)
-    #     try:
-    #         convert_JMA_i(filename)
-    #     except ValueError :
-    #         print(f"Error {filename} ： {ValueError}")
-    #         sys.exit(1)
+    #for i in range(1970, 1973) :
+    for i in range(2019, 2022) :
+        filename = 'i' + str(i) + '.dat'
+        print(filename)
+        try:
+            convert_JMA_i(filename)
+        except ValueError :
+            print(f"Error {filename} ： {ValueError}")
+            sys.exit(1)
 
 
