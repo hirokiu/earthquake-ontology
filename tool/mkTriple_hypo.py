@@ -113,20 +113,33 @@ def read_fixed_hypo(hypo):
     return df
 
 def convert(input):
+#    print('latitude_deg.dtypes')
     if input.latitude_deg.dtypes == 'O' :
         input['latitude_deg'] = input['latitude_deg'].str.replace(' ', '')
+        input['latitude_deg'] = input['latitude_deg'].str.replace('/', '')
+#    print('longitude_deg.dtypes')
     if input.longitude_deg.dtypes == 'O' :
         input['longitude_deg'] = input['longitude_deg'].str.replace(' ', '')
+        input['longitude_deg'] = input['longitude_deg'].str.replace('/', '')
+#    print('depth.dtypes')
     if input.depth.dtypes == 'O' :
         input['depth'] = input['depth'].str.replace(' ', '')
+        input['depth'] = input['depth'].str.replace('/', '')
+#    print('hypo_judge.dtypes')
     if input.hypo_judge.dtypes == 'O' :
         input.replace({'hypo_judge' : {'M' : 10}}, inplace=True)
         input.replace({'hypo_judge' : {' ' : nan}}, inplace=True)
+#    print('hypo_judge')
     input.hypo_judge = input.hypo_judge.astype("float64")
+#    print(input.latitude_deg)
     input.latitude_deg = input.latitude_deg.astype("float64")
+#    print('input.latitude_min')
     input.latitude_min = input.latitude_min.astype("float64")
+#    print('longitude_deg')
     input.longitude_deg = input.longitude_deg.astype("float64")
+#    print('longitude_min')
     input.longitude_min = input.longitude_min.astype("float64")
+#    print('depth')
     input.depth = input.depth.astype("float64")
     return input
 
@@ -455,7 +468,7 @@ def convert_JMA_i(_filename) :
                 # 日付 or 時刻が欠測の場合は文字列に変換
                 # それ以外は0で埋める
                 ###
-                if re.match(r'^[0-9]*$', record_obs[2]) and re.match(r'^[0-9]*$', record_obs[3]) :
+                if re.match(r'^[0-9]*$', record_obs[2]) and int(record_obs[2]) <= 31 and re.match(r'^[0-9]*$', record_obs[3]) and int(record_obs[3]) <= 24 :
                     if not( re.match(r'^[0-9]*$', record_obs[4]) ) :
                         record_obs[4] = 0
 
@@ -465,9 +478,11 @@ def convert_JMA_i(_filename) :
                     if re.match(r'^[0-9] $', _millisec) :
                         _millisec = record_obs[5][0:1] + '0'
 
+                    # print(_hypo_id[1:7] + '|' + str(record_obs[2]).zfill(2) + '|' + str(record_obs[3]).zfill(2) + '|' + str(record_obs[4]).zfill(2) + '|' + _millisec)
                     record_obs[-1] = pd.to_datetime(_hypo_id[1:7] + str(record_obs[2]).zfill(2) + str(record_obs[3]).zfill(2) + str(record_obs[4]).zfill(2) + _millisec, errors='ignore').tz_localize('Asia/Tokyo').tz_convert('UTC')
                 else :
-                    record_obs[-1] = str('"' + _hypo_id[1:7] + '// 欠測"')
+                    record_obs[-1] = str('"' + _hypo_id[1:7] + str(record_obs[2]).zfill(2) + str(record_obs[3]).zfill(2) + str(record_obs[4]).zfill(2) + _millisec +  '// 欠測,不明データ"')
+                    # record_obs[-1] = str('"' + _hypo_id[1:7] +  '// 欠測,不明データ"')
 
                 #print(record_obs)
                 _dataFrame_obs.append(record_obs)
@@ -530,7 +545,7 @@ if __name__ == "__main__":
     #convert_JMA_i(filename)
 
     #for i in range(1970, 1973) :
-    for i in range(2019, 2022) :
+    for i in range(1980, 1982) :
         filename = 'i' + str(i) + '.dat'
         print(filename)
         try:
