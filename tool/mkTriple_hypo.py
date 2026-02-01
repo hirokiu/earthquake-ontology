@@ -92,7 +92,7 @@ shindo_dir = '地震月報_震度'
 
 #filename = 'jma-earthquake-named.tsv'
 #filename = 'jma-observers.tsv'
-#filename = 'JMA/地震月報_震度/code_p.dat'
+code_p_filename = 'STAs/code_p.dat'
 #filename = 'JMA/地震月報_震度/i2019.dat'
 #filename = 'JMA/地震月報_震源/h2019'
 
@@ -253,8 +253,8 @@ def convert_JMA_stationList():
 #---
 # 気象庁のcode_pファイルを変換
 #---
-def convert_JMA_code_p():
-    with open(os.path.join(base_dir,data_dir,filename), encoding='sjis', newline='') as f:
+def convert_JMA_code_p(code_p_filename):
+    with open(os.path.join(base_dir,data_dir,code_p_filename), encoding='sjis', newline='') as f:
         reader = csv.reader(f, delimiter='\t')
         # ヘッダ行だけを読み込んで、スペース区切りで表示
         #header = next(reader)
@@ -269,10 +269,11 @@ def convert_JMA_code_p():
             print('    schema:latitude ' + cols[2][0:2] + '.' + cols[2][2:4] + ' ;')
             print('    schema:longitude ' + cols[3][0:3] + '.' + cols[3][3:5] + ' ;')
             if cols[5] :
-                print('    schema:availabilityStarts "' + str(cols[4]).strip() + '" ;')
-                print('    schema:availabilityEnds "' + str(cols[5]).strip() + '" .')
+                print('    schema:availabilityStarts ' + str( pd.to_datetime(str(cols[4]).strip(), errors='ignore').tz_localize('Asia/Tokyo').tz_convert('UTC').isoformat() ) + ' ;')
+                print('    schema:availabilityEnds ' + str( pd.to_datetime(str(cols[5]).strip(), errors='ignore').tz_localize('Asia/Tokyo').tz_convert('UTC').isoformat() ) + ' .')
             else :
-                print('    schema:availabilityStarts "' + str(cols[4]).strip() + '" .')
+                print(cols[4])
+                print('    schema:availabilityStarts ' + str( pd.to_datetime(str(cols[4]).strip(), errors='ignore').tz_localize('Asia/Tokyo').tz_convert('UTC').isoformat() ) + ' .')
             print()
 
 #---
@@ -538,20 +539,20 @@ def convert_JMA_i(_filename) :
 if __name__ == "__main__":
 
     # 観測点一覧を変換
-    #convert_JMA_code_p()
+    convert_JMA_code_p(code_p_filename)
 
     # TEST
     #filename = 'test_i2019.dat'
     #convert_JMA_i(filename)
 
     #for i in range(1970, 1973) :
-    for i in range(1980, 1982) :
-        filename = 'i' + str(i) + '.dat'
-        print(filename)
-        try:
-            convert_JMA_i(filename)
-        except ValueError :
-            print(f"Error {filename} ： {ValueError}")
-            sys.exit(1)
+    # for i in range(1980, 1982) :
+    #     filename = 'i' + str(i) + '.dat'
+    #     print(filename)
+    #     try:
+    #         convert_JMA_i(filename)
+    #     except ValueError :
+    #         print(f"Error {filename} ： {ValueError}")
+    #         sys.exit(1)
 
 
