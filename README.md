@@ -19,6 +19,11 @@ To adhere to the FAIR (Findable, Accessible, Interoperable, and Reusable) princi
 * **Ontology URI:** [https://seismic.balog.jp/ontology/](https://seismic.balog.jp/ontology/)
 * **Persistent Archive:** This GitHub repository (`ISWC2026` branch) acts as a persistent mirror for the ontology and sample datasets.
 
+## 📦 Data Downloads (GitHub Releases)
+For stable versions and larger datasets, please visit the **[Releases](https://github.com/hirokiu/earthquake-ontology/releases)** section of this repository. The release assets include:
+* Full RDF dumps of the Earthquake LOD (Turtle format).
+* The latest stable version of the Earthquake Ontology.
+* 
 ## 📂 Repository Structure
 ```text
 .
