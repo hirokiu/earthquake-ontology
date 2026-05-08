@@ -25,8 +25,6 @@ To adhere to the FAIR (Findable, Accessible, Interoperable, and Reusable) princi
 ├── ontology/
 │   └── jp-earthquake.ttl       # The core Earthquake Ontology definition (Turtle format)
 ├── datasets/
-│   ├── sample_jma_data.ttl     # Sample LOD converted from JMA Earthquake Monthly Report
-│   └── sample_fdsn_data.ttl    # Sample LOD generated from FDSN APIs
-├── queries/
-│   └── example_queries.rq      # Example SPARQL queries used in the paper
+│   ├── JMA.zip     # Sample LOD converted from JMA Earthquake Monthly Report
+│   └── FDSN.zip    # Sample LOD generated from FDSN APIs
 └── README.md
