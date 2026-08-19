@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "earthquake-ontology"
+version = "0.1.0"
+description = "Validation and conversion tools for the Earthquake Ontology LOD"
+requires-python = ">=3.10"
+dependencies = [
+    "httpx>=0.28,<1",
+    "pydantic>=2.11,<3",
+    "pydantic-settings[yaml]>=2.10,<3",
+    "rdflib>=7,<8",
+    "pyshacl>=0.30,<1",
+]
+
+[project.scripts]
+earthquake-rdf-audit = "earthquake_ontology.audit:main"
+earthquake-rdf-convert = "earthquake_ontology.cli:main"
+earthquake-data-fetch = "earthquake_ontology.fetch_cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

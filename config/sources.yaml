@@ -1,0 +1,109 @@
+storage:
+  raw_directory: var/raw
+  manifest_directory: var/manifests
+
+http:
+  connect_timeout_seconds: 15
+  read_timeout_seconds: 120
+  retries: 3
+  user_agent: earthquake-ontology/0.1 (+https://seismic.balog.jp/)
+
+sources:
+  fdsn_events_usgs:
+    enabled: true
+    provider: usgs-fdsn
+    dataset_uri: https://earthquake.usgs.gov/fdsnws/event/1/
+    discovery:
+      type: fdsn_yearly
+      endpoint: https://earthquake.usgs.gov/fdsnws/event/1/query
+      start_year: 1960
+      end_year: current
+      minimum_magnitude: 3.0
+    destination_name: events-{period}.xml
+    media_type: application/xml
+    parser: fdsn_quakeml
+    license_url: https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits
+
+  fdsn_stations_earthscope:
+    enabled: false
+    provider: earthscope-fdsn
+    dataset_uri: https://service.earthscope.org/fdsnws/station/1/
+    discovery:
+      type: direct
+      url: https://service.earthscope.org/fdsnws/station/1/query?level=station&format=xml&includerestricted=false
+      period: current
+    destination_name: stations-current.xml
+    media_type: application/xml
+    parser: fdsn_stationxml
+    license_url: https://www.earthscope.org/terms/
+
+  jma_daily_hypocenters:
+    enabled: true
+    provider: jma
+    dataset_uri: https://www.data.jma.go.jp/eqev/data/daily_map/index.html
+    discovery:
+      type: html_links
+      index_url: https://www.data.jma.go.jp/eqev/data/daily_map/index.html
+      link_pattern: '/daily_map/(?P<period>[0-9]{8})[.]html$'
+    destination_name: daily-{period}.html
+    media_type: text/html
+    parser: jma_daily_hypocenter_html
+    license_url: https://www.jma.go.jp/jma/kishou/info/coment.html
+
+  jma_intensity:
+    enabled: true
+    provider: jma
+    dataset_uri: https://www.data.jma.go.jp/eqev/data/bulletin/shindo.html
+    discovery:
+      type: html_links
+      index_url: https://www.data.jma.go.jp/eqev/data/bulletin/shindo.html
+      link_pattern: '/data/shindo/i(?P<period>[0-9]{4})[.]zip$'
+    destination_name: i{period}.zip
+    media_type: application/zip
+    parser: jma_intensity_zip
+    license_url: https://www.jma.go.jp/jma/kishou/info/coment.html
+
+  jma_intensity_stations:
+    enabled: true
+    provider: jma
+    dataset_uri: https://www.data.jma.go.jp/eqev/data/bulletin/shindo.html
+    discovery:
+      type: direct
+      url: https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip
+      period: current
+    destination_name: code_p.zip
+    media_type: application/zip
+    parser: jma_station_zip
+    license_url: https://www.jma.go.jp/jma/kishou/info/coment.html
+
+  jshis_ground_motion_flatfile:
+    enabled: true
+    provider: nied-jshis
+    dataset_uri: https://www.j-shis.bosai.go.jp/labs/ground-motion-flatfile/
+    discovery:
+      type: html_links
+      index_url: https://www.j-shis.bosai.go.jp/labs/ground-motion-flatfile/
+      link_pattern: '/data/(?P<period>v[0-9]{4})/flatfile-v[0-9]{4}[.]zip$'
+    destination_name: flatfile-{period}.zip
+    media_type: application/zip
+    parser: jshis_ground_motion_flatfile_zip
+    license_url: https://www.j-shis.bosai.go.jp/labs/ground-motion-flatfile/doc/gmf_yakkan.pdf
+
+  # K-NET/KiK-net requires a registered account. Enable this source only in a
+  # private deployment config and provide credentials through the named env vars.
+  nied_knet_example:
+    enabled: false
+    provider: nied
+    dataset_uri: https://www.kyoshin.bosai.go.jp/kyoshin/download/
+    discovery:
+      type: direct
+      url: https://www.kyoshin.bosai.go.jp/kyoshin/download/all/zip/2011/03/20110311144600/20110311144600_ascii.zip
+      period: '20110311144600'
+    destination_name: 20110311144600_ascii.zip
+    media_type: application/zip
+    parser: knet_ascii_zip
+    auth:
+      type: basic
+      username_env: EQ_NIED_USERNAME
+      password_env: EQ_NIED_PASSWORD
+    license_url: https://www.kyoshin.bosai.go.jp/ja/?page_id=222

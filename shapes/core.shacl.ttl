@@ -1,0 +1,40 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix jpe: <https://seismic.balog.jp/ontology/jp-earthquake.ttl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix schema: <http://schema.org/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+jpe:HypocenterShape a sh:NodeShape ;
+    sh:targetClass jpe:hypocenter ;
+    sh:property [ sh:path jpe:originTime ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:dateTime ] ;
+    sh:property [ sh:path schema:latitude ; sh:minCount 1 ; sh:maxCount 1 ; sh:minInclusive -90 ; sh:maxInclusive 90 ] ;
+    sh:property [ sh:path schema:longitude ; sh:minCount 1 ; sh:maxCount 1 ; sh:minInclusive -180 ; sh:maxInclusive 180 ] ;
+    sh:property [ sh:path jpe:depth ; sh:maxCount 1 ] ;
+    sh:property [ sh:path jpe:magnitude ; sh:maxCount 1 ] ;
+    sh:property [
+        sh:path [ sh:alternativePath ( prov:wasDerivedFrom dcterms:source ) ] ;
+        sh:minCount 1 ;
+        sh:nodeKind sh:IRI ;
+        sh:severity sh:Warning ;
+        sh:message "取得元が安定したURIを公開している場合は、そのURIを記録してください。"@ja
+    ] .
+
+jpe:ObservedWaveShape a sh:NodeShape ;
+    sh:targetClass jpe:observedWave ;
+    sh:property [ sh:path schema:startTime ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:dateTime ] ;
+    sh:property [ sh:path jpe:hasHypocenter ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jpe:hypocenter ] ;
+    sh:property [ sh:path jpe:observedBy ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jpe:observer ] ;
+    sh:property [ sh:path jpe:calcShindo ; sh:maxCount 1 ; sh:datatype xsd:decimal ] .
+
+jpe:StationShape a sh:NodeShape ;
+    sh:targetClass jpe:observer ;
+    sh:property [ sh:path jpe:stationIdentifier ; sh:minCount 1 ; sh:maxCount 1 ] ;
+    sh:property [ sh:path schema:latitude ; sh:minCount 1 ; sh:maxCount 1 ; sh:minInclusive -90 ; sh:maxInclusive 90 ] ;
+    sh:property [ sh:path schema:longitude ; sh:minCount 1 ; sh:maxCount 1 ; sh:minInclusive -180 ; sh:maxInclusive 180 ] .
+
+jpe:DatasetSnapshotShape a sh:NodeShape ;
+    sh:targetClass jpe:DatasetSnapshot ;
+    sh:property [ sh:path jpe:snapshotOf ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+    sh:property [ sh:path prov:generatedAtTime ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:dateTime ] ;
+    sh:property [ sh:path jpe:sourceChecksum ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:hexBinary ] .

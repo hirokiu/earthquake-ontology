@@ -1,171 +1,206 @@
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX owl: <http://www.w3.org/2002/07/owl#>
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-PREFIX schema: <http://schema.org/>
-PREFIX dcterms: <http://purl.org/dc/terms/>
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-PREFIX sosa: <http://www.w3.org/ns/sosa/>
-PREFIX ssn:  <http://www.w3.org/ns/ssn/>
-
-PREFIX jpe: <https://seismic.balog.jp/ontology/jp-earthquake.ttl#>
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <http://schema.org/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix jpe: <https://seismic.balog.jp/ontology/jp-earthquake.ttl#> .
 
 <https://seismic.balog.jp/ontology/jp-earthquake.ttl#>
-    a   owl:Ontology ;
-    rdfs:label  "地震オントロジー"@ja ;
-    rdfs:label  "earthquake ontology for seismic dataset"@en ;
-    dcterms:creator [   foaf:homepage   <https://seismic.balog.jp/> ;
-                        foaf:name       "hiroki_u" ;
-                    ] ;
-    dcterms:issued   "2022-10-16" ;
-    dcterms:modified   "2023-05-09" .
+    a owl:Ontology ;
+    rdfs:label "地震オントロジー"@ja , "Earthquake Ontology for Seismic Datasets"@en ;
+    dcterms:creator [ foaf:homepage <https://seismic.balog.jp/> ; foaf:name "hiroki_u" ] ;
+    dcterms:issued "2022-10-16"^^xsd:date ;
+    dcterms:modified "2026-08-19"^^xsd:date ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    owl:versionInfo "2026-08-19" .
 
-jpe:earthquake  a   sosa:FeatureOfInterest ;
-    rdfs:label "earth"@en ;
-    rdfs:label  "地球"@ja .
+# Classes
+jpe:earthquake a owl:Class ;
+    rdfs:label "地震現象"@ja , "earthquake"@en ;
+    rdfs:subClassOf schema:Event , sosa:FeatureOfInterest .
 
-jpe:earthquake  a   owl:Class ;
-    rdfs:label  "地震現象"@ja ;
-    rdfs:label  "earthquake"@en ;
-    rdfs:subClassOf schema:Event .
+jpe:hypocenter a owl:Class ;
+    rdfs:label "震源"@ja , "hypocenter"@en ;
+    rdfs:subClassOf schema:Place , sosa:FeatureOfInterest .
 
-jpe:observer    a   owl:Class ;
-    rdfs:label  "観測点"@ja ;
-    rdfs:label  "Station"@en ;
-    skos:prefLabel  "観測点"@ja ;
+jpe:epicenter a owl:Class ;
+    rdfs:label "震央"@ja , "epicenter"@en ;
+    rdfs:subClassOf schema:Place , sosa:FeatureOfInterest .
+
+jpe:observer a owl:Class ;
+    rdfs:label "観測点"@ja , "observation station"@en ;
+    skos:prefLabel "観測点"@ja , "observation station"@en ;
     rdfs:subClassOf sosa:Sensor .
 
-jpe:hypocenter   a   owl:Class ;
-    rdfs:label  "震源"@ja ;
-    rdfs:label  "hypocenter"@en ;
-    rdfs:subClassOf schema:Event .
-jpe:epicenter   a   owl:Class ;
-    rdfs:label  "震央"@ja ;
-    rdfs:label  "epicenter"@en ;
-    rdfs:subClassOf schema:Event .
+jpe:seismicMotion a owl:Class ;
+    rdfs:label "地震動"@ja , "seismic motion"@en ;
+    rdfs:subClassOf sosa:Observation .
 
-jpe:seismicMotion   a   sosa:Observation ;
-    rdfs:label  "地震動"@ja ;
-    rdfs:label  "seismic motion"@en ;
-    skos:prefLabel  "地震動"@ja ;
-    skos:altLabel   "seismic motion"@en ;
-    sosa:isObservedBy jpe:observer .
+jpe:observedWave a owl:Class ;
+    rdfs:label "観測波形"@ja , "observed wave"@en ;
+    rdfs:subClassOf sosa:Observation .
 
-jpe:observedWave   a   sosa:Observation ;
-    rdfs:label  "観測波形"@ja ;
-    rdfs:label  "observed wave"@en ;
-    skos:prefLabel  "観測波形"@ja ;
-    sosa:isObservedBy jpe:observer .
+jpe:DatasetSnapshot a owl:Class ;
+    rdfs:label "データセット・スナップショット"@ja , "dataset snapshot"@en ;
+    rdfs:comment "外部機関のデータセットを特定の取得時点でRDFへ変換した、不変の版。各版は独立した名前付きグラフとして管理する。"@ja ,
+        "An immutable RDF rendition of an external dataset as retrieved at a specific time. Each rendition is managed as a separate named graph."@en ;
+    rdfs:subClassOf dcat:Dataset , prov:Entity .
 
-jpe:originTime  a   rdf:Property ;
-    rdfs:label  "オリジンタイム"@ja ;
-    rdfs:label  "origin time"@en ;
-    skos:prefLabel  "オリジンタイム"@ja ;
-    skos:altLabel   "origin time"@en .
+jpe:StrongMotionRecord a owl:Class ;
+    rdfs:label "強震記録"@ja , "strong-motion record"@en ;
+    rdfs:comment "観測点で得られた強震波形またはそこから算出した主要指標を表す。"@ja ;
+    rdfs:subClassOf jpe:observedWave .
 
-jpe:magnitude  a   rdf:Property ;
-    rdfs:label  "マグニチュード"@ja ;
-    rdfs:label   "magnitude"@en ;
-    skos:prefLabel  "マグニチュード"@ja ;
-    skos:altLabel   "magnitude"@en ;
+# Datatype properties used by the published JMA and FDSN datasets
+jpe:originTime a owl:DatatypeProperty ;
+    rdfs:label "オリジンタイム"@ja , "origin time"@en ;
+    rdfs:domain jpe:hypocenter ; rdfs:range xsd:dateTime .
+
+jpe:magnitude a owl:DatatypeProperty ;
+    rdfs:label "マグニチュード"@ja , "magnitude"@en ;
+    rdfs:domain jpe:hypocenter ; rdfs:range xsd:decimal ;
     rdfs:subPropertyOf schema:value .
 
-jpe:magnitudeType  a   rdf:Property ;
-    rdfs:label  "マグニチュード種別"@ja ;
-    rdfs:label   "magnitude type"@en ;
-    skos:prefLabel  "マグニチュード種別"@ja ;
-    skos:altLabel   "magnitude type"@en ;
+jpe:magnitudeType a owl:DatatypeProperty ;
+    rdfs:label "マグニチュード種別"@ja , "magnitude type"@en ;
+    rdfs:domain jpe:hypocenter ; rdfs:range xsd:string .
+
+jpe:depth a owl:DatatypeProperty ;
+    rdfs:label "震源の深さ"@ja , "hypocentral depth"@en ;
+    rdfs:comment "基準面から震源までの深さをメートル単位で表す。提供機関が基準面より上の震源を負値で表す場合は原値を保持する。"@ja ;
+    rdfs:domain jpe:hypocenter ; rdfs:range xsd:decimal ;
     rdfs:subPropertyOf schema:value .
 
-jpe:depth  a   rdf:Property ;
-    rdfs:label  "震源の深さ"@ja ;
-    rdfs:label  "depth"@en ;
-    skos:prefLabel  "震源の深さ"@ja ;
-    skos:altLabel  "depth of hypocenter"@en ;
+jpe:shindo a owl:DatatypeProperty , sosa:ObservableProperty ;
+    rdfs:label "震度"@ja , "JMA seismic intensity"@en ;
+    rdfs:range rdfs:Literal .
+
+jpe:calcShindo a owl:DatatypeProperty ;
+    rdfs:label "計測震度"@ja , "instrumental seismic intensity"@en ;
+    rdfs:domain jpe:observedWave ; rdfs:range xsd:decimal ;
     rdfs:subPropertyOf schema:value .
 
-jpe:shindo  a   sosa:ObservableProperty ;
-    rdfs:label  "震度"@ja ;
-    rdfs:label  "intensity"@en ;
-    skos:prefLabel  "震度"@ja ;
-    skos:altLabel   "intensity"@en .
+jpe:catalog a owl:DatatypeProperty ;
+    rdfs:label "カタログ"@ja , "catalog"@en ;
+    rdfs:comment "震源情報を提供した地震カタログまたは機関。"@ja ;
+    rdfs:domain jpe:hypocenter ; rdfs:range xsd:string .
 
-jpe:seismicIntensity  a   sosa:ObservableProperty ;
-    rdfs:label  "計測震度"@ja ;
-    rdfs:label  "Instrumental Seismic Intensity"@en ;
-    skos:prefLabel  "計測震度"@ja ;
-    skos:altLabel  "気象庁計測震度"@ja ;
-    rdf:subPropertyOf schema:value .
+jpe:determinatedWay a owl:DatatypeProperty ;
+    rdfs:label "震源決定方法"@ja , "hypocenter determination method"@en ;
+    rdfs:comment "震源の決定方法、決定フラグ、または決定機関。"@ja ;
+    rdfs:domain jpe:hypocenter ; rdfs:range xsd:string .
 
-jpe:detarminatedWay    a   rdf:Property ;
-    rdfs:label  "震源決定フラグ"@ja ;
-    skos:prefLabel  "震源決定フラグ"@ja ;
-    rdfs:comment    "震源決定の方法"@ja .
+jpe:hypocenterKinds a owl:DatatypeProperty ;
+    rdfs:label "震源レコード種別"@ja , "hypocenter record type"@en ;
+    rdfs:domain jpe:hypocenter ; rdfs:range xsd:string .
 
-jpe:detarminatedWith    a   rdf:Property ;
-    rdfs:label  "震源決定に利用した波形"@ja ;
-    skos:prefLabel  "震源決定に利用した波形"@ja ;
-    rdfs:comment    "震源決定に利用した波形"@ja .
+jpe:observedStationNum a owl:DatatypeProperty ;
+    rdfs:label "観測点数"@ja , "number of observation stations"@en ;
+    rdfs:comment "震度1以上を観測した観測点の数。"@ja ;
+    rdfs:domain jpe:hypocenter ; rdfs:range xsd:nonNegativeInteger .
 
-jpe:estimatedWith    a   rdf:Property ;
-    rdfs:label  "震源推定に利用した波形"@ja ;
-    skos:prefLabel  "震源推定に利用した波形"@ja ;
-    rdfs:comment    "震源推定に利用した波形"@ja .
+jpe:stationIdentifier a owl:DatatypeProperty ;
+    rdfs:label "観測点番号"@ja , "station identifier"@en ;
+    rdfs:comment "観測機関または観測網が定めた観測点の識別子。"@ja ;
+    rdfs:domain jpe:observer ; rdfs:range xsd:string ;
+    rdfs:subPropertyOf schema:identifier .
 
-jpe:hasHypocenter  a   rdf:Property ;
-    rdfs:label  "震源"@ja ;
-    skos:prefLabel  "震源"@ja ;
-    rdfs:comment    "地震現象の震源"@ja .
+jpe:withTravelTimeTable a owl:DatatypeProperty ;
+    rdfs:label "使用走時表"@ja , "travel-time table used"@en ;
+    rdfs:domain jpe:hypocenter ; rdfs:range xsd:string .
 
-jpe:isHypocenterOf   a   rdf:Property ;
-    rdfs:label  "震源とする地震"@ja ;
-    skos:prefLabel  "震源とする地震"@ja ;
-    rdfs:comment    "これを震源とする地震現象"@ja .
+jpe:recordIdentifier a owl:DatatypeProperty ;
+    rdfs:label "強震記録ID"@ja ; rdfs:domain jpe:StrongMotionRecord ; rdfs:range xsd:string .
+jpe:fileBaseName a owl:DatatypeProperty ;
+    rdfs:label "波形ファイルベース名"@ja ; rdfs:domain jpe:StrongMotionRecord ; rdfs:range xsd:string .
+jpe:sampleCount a owl:DatatypeProperty ;
+    rdfs:label "サンプル数"@ja ; rdfs:domain jpe:StrongMotionRecord ; rdfs:range xsd:nonNegativeInteger .
+jpe:samplingFrequency a owl:DatatypeProperty ;
+    rdfs:label "サンプリング周波数 (Hz)"@ja ; rdfs:domain jpe:StrongMotionRecord ; rdfs:range xsd:decimal .
+jpe:peakGroundAccelerationNS a owl:DatatypeProperty ; rdfs:label "南北成分最大加速度"@ja ; rdfs:domain jpe:StrongMotionRecord ; rdfs:range xsd:decimal .
+jpe:peakGroundAccelerationEW a owl:DatatypeProperty ; rdfs:label "東西成分最大加速度"@ja ; rdfs:domain jpe:StrongMotionRecord ; rdfs:range xsd:decimal .
+jpe:peakGroundAccelerationUD a owl:DatatypeProperty ; rdfs:label "上下成分最大加速度"@ja ; rdfs:domain jpe:StrongMotionRecord ; rdfs:range xsd:decimal .
+jpe:peakGroundVelocityNS a owl:DatatypeProperty ; rdfs:label "南北成分最大速度"@ja ; rdfs:domain jpe:StrongMotionRecord ; rdfs:range xsd:decimal .
+jpe:peakGroundVelocityEW a owl:DatatypeProperty ; rdfs:label "東西成分最大速度"@ja ; rdfs:domain jpe:StrongMotionRecord ; rdfs:range xsd:decimal .
+jpe:peakGroundVelocityUD a owl:DatatypeProperty ; rdfs:label "上下成分最大速度"@ja ; rdfs:domain jpe:StrongMotionRecord ; rdfs:range xsd:decimal .
+jpe:spectrumIntensity a owl:DatatypeProperty ; rdfs:label "SI値"@ja ; rdfs:domain jpe:StrongMotionRecord ; rdfs:range xsd:decimal .
+jpe:instrumentalIntensity a owl:DatatypeProperty ; rdfs:label "計測震度"@ja ; rdfs:domain jpe:StrongMotionRecord ; rdfs:range xsd:decimal .
+jpe:faultDistance a owl:DatatypeProperty ; rdfs:label "断層最短距離 (km)"@ja ; rdfs:domain jpe:StrongMotionRecord ; rdfs:range xsd:decimal .
 
-jpe:hypocenterKinds   a   rdf:Property ;
-    rdfs:label  "震源レコード種別"@ja ;
-    skos:prefLabel  "震源レコード種別"@ja ;
-    rdfs:comment    "震源レコードの種別"@ja .
+# Object properties
+jpe:hasHypocenter a owl:ObjectProperty ;
+    rdfs:label "震源"@ja , "has hypocenter"@en ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( jpe:earthquake jpe:observedWave jpe:StrongMotionRecord ) ] ;
+    rdfs:range jpe:hypocenter ; owl:inverseOf jpe:isHypocenterOf .
 
-jpe:mainShock   a   rdf:Property ;
-    rdfs:label  "本震"@ja ;
-    skos:prefLabel  "本震"@ja ;
-    rdfs:comment    "地震における本震（唯一）を示す"@ja .
+jpe:isHypocenterOf a owl:ObjectProperty ;
+    rdfs:label "震源とする地震・観測"@ja , "is hypocenter of"@en ;
+    rdfs:domain jpe:hypocenter .
 
-jpe:afterShock   a   rdf:Property ;
-    rdfs:label  "余震"@ja ;
-    skos:prefLabel  "余震"@ja ;
-    rdfs:comment    "地震における複数の余震を示す"@ja .
-
-jpe:foreShock   a   rdf:Property ;
-    skos:prefLabel  ""@ja ;
-    rdfs:comment    ""@ja .
-
-jpe:preShock   a   rdf:Property ;
-    skos:prefLabel  ""@ja ;
-    rdfs:comment    ""@ja .
-
-jpe:stationIdentifier   a   rdf:Property ;
-    rdfs:subPropertyOf  schema:identifier ;
-    rdfs:label  "観測点番号"@ja ;
-    skos:prefLabel  "観測点番号"@ja ;
-    rdfs:comment    "各観測期間が定めた観測点のID"@ja .
-
-jpe:withTravelTimeTable  a   rdf:Property ;
-    rdfs:label      "使用走時表"@ja ;
-    skos:prefLabel  "使用走時表"@ja ;
-    rdfs:comment    "震源を決定するために使った走時表の種類"@ja .
-
-jpe:observedStaionNum    a   rdf:Property ;
-    rdfs:label      "観測点数" ;
-    rdfs:comment    "震度１以上を観測した観測点の数"@ja .
-
-jpe:observedBy    a   rdf:Property ;
-    rdfs:label      "波形を観測した観測点" ;
-    rdfs:comment    "波形を観測した観測点"@ja ;
+jpe:observedBy a owl:ObjectProperty ;
+    rdfs:label "観測した観測点"@ja , "observed by"@en ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( jpe:observedWave jpe:StrongMotionRecord ) ] ; rdfs:range jpe:observer ;
     rdfs:subPropertyOf sosa:madeBySensor .
 
-jpe:observationNetwork    a   rdf:Property ;
-    rdfs:label      "観測網" ;
-    rdfs:comment    "観測点が所属する観測網の名称"@ja .
+jpe:detarminatedWith a owl:ObjectProperty ;
+    rdfs:label "震源決定に利用した波形"@ja ;
+    rdfs:domain jpe:hypocenter ; rdfs:range jpe:observedWave .
+
+jpe:estimatedWith a owl:ObjectProperty ;
+    rdfs:label "震源推定に利用した波形"@ja ;
+    rdfs:domain jpe:hypocenter ; rdfs:range jpe:observedWave .
+
+jpe:mainShock a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:label "本震"@ja , "main shock"@en ;
+    rdfs:domain jpe:earthquake ; rdfs:range jpe:hypocenter .
+
+jpe:afterShock a owl:ObjectProperty ;
+    rdfs:label "余震"@ja , "aftershock"@en ;
+    rdfs:domain jpe:earthquake ; rdfs:range jpe:hypocenter .
+
+jpe:foreShock a owl:ObjectProperty ;
+    rdfs:label "前震"@ja , "foreshock"@en ;
+    rdfs:domain jpe:earthquake ; rdfs:range jpe:hypocenter .
+
+jpe:observationNetwork a rdf:Property ;
+    rdfs:label "観測網"@ja , "observation network"@en ;
+    rdfs:domain jpe:observer .
+
+# Snapshot and provenance metadata. Individual resources should also use
+# prov:wasDerivedFrom (or dcterms:source) when the provider exposes a stable URI.
+jpe:snapshotOf a owl:ObjectProperty ;
+    rdfs:label "スナップショット元データセット"@ja , "snapshot of"@en ;
+    rdfs:domain jpe:DatasetSnapshot ; rdfs:range dcat:Dataset .
+
+jpe:previousSnapshot a owl:ObjectProperty ;
+    rdfs:label "直前のスナップショット"@ja , "previous snapshot"@en ;
+    rdfs:domain jpe:DatasetSnapshot ; rdfs:range jpe:DatasetSnapshot ;
+    rdfs:subPropertyOf prov:wasRevisionOf .
+
+jpe:sourceChecksum a owl:DatatypeProperty ;
+    rdfs:label "取得元チェックサム"@ja , "source checksum"@en ;
+    rdfs:comment "取得した原本全体のSHA-256チェックサム。"@ja ;
+    rdfs:domain jpe:DatasetSnapshot ; rdfs:range xsd:hexBinary .
+
+# Deprecated misspellings retained for compatibility with earlier releases
+jpe:detarminatedWay a owl:DatatypeProperty ;
+    rdfs:label "震源決定方法（旧綴り）"@ja ;
+    owl:deprecated true ; owl:equivalentProperty jpe:determinatedWay .
+
+jpe:observedStaionNum a owl:DatatypeProperty ;
+    rdfs:label "観測点数（旧綴り）"@ja ;
+    owl:deprecated true ; owl:equivalentProperty jpe:observedStationNum .
+
+jpe:seismicIntensity a owl:DatatypeProperty ;
+    rdfs:label "計測震度（旧語彙）"@ja ;
+    owl:deprecated true ; owl:equivalentProperty jpe:calcShindo .
+
+jpe:preShock a owl:ObjectProperty ;
+    rdfs:label "前震（旧語彙）"@ja ;
+    owl:deprecated true ; owl:equivalentProperty jpe:foreShock .
