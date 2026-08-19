@@ -38,6 +38,10 @@ TRAVEL_TIME_TABLES = (
     "他機関", "標準走時表(83Aなど)", "三陸沖用走時表", "北海道東方沖用走時表",
     "千島列島付近用走時表(1を併用)", "標準走時表(JMA2001)", "千島列島付近用走時表(5を併用)",
 )
+DETERMINING_AGENCIES = {
+    "U": "https://www.usgs.gov/",
+    "I": "https://www.isc.ac.uk/",
+}
 
 
 class JmaRecordError(ValueError):
@@ -175,6 +179,7 @@ class JmaIntensityParser(DatasetParser):
             magnitude=_magnitude(parts[16], parts[17]),
             magnitude_type=parts[18].strip() or None,
             determination_method=DETERMINATION_METHODS.get(determination_code, determination_code or None),
+            determined_by_uri=DETERMINING_AGENCIES.get(determination_code, "https://www.jma.go.jp/jma/"),
             record_type=RECORD_TYPES.get(parts[0]),
             maximum_intensity=INTENSITIES.get(parts[24].strip(), parts[24].strip() or None),
             observed_station_count=int(station_count_raw) if station_count_raw.isdigit() else None,

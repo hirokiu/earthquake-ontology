@@ -25,7 +25,7 @@ sources:
     license_url: https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits
 
   fdsn_stations_earthscope:
-    enabled: false
+    enabled: true
     provider: earthscope-fdsn
     dataset_uri: https://service.earthscope.org/fdsnws/station/1/
     discovery:
@@ -74,6 +74,19 @@ sources:
     destination_name: code_p.zip
     media_type: application/zip
     parser: jma_station_zip
+    license_url: https://www.jma.go.jp/jma/kishou/info/coment.html
+
+  jma_intensity_station_details:
+    enabled: true
+    provider: jma
+    dataset_uri: https://www.data.jma.go.jp/eqev/data/kyoshin/jma-shindo.html
+    discovery:
+      type: direct
+      url: https://www.data.jma.go.jp/eqev/data/kyoshin/jma-shindo.html
+      period: current
+    destination_name: jma-shindo-current.html
+    media_type: text/html
+    parser: jma_intensity_station_html
     license_url: https://www.jma.go.jp/jma/kishou/info/coment.html
 
   jshis_ground_motion_flatfile:

@@ -8,6 +8,7 @@ sys.path.insert(0, str(Path(__file__).parents[1] / "src"))
 from earthquake_ontology.acquisition import DataFetcher
 from earthquake_ontology.config import load_settings
 from earthquake_ontology.parsers import FdsnQuakeMlParser, FdsnStationXmlParser
+from earthquake_ontology.parsers.base import agency_uri
 
 ROOT = Path(__file__).parents[1]
 
@@ -29,6 +30,13 @@ STATIONXML = b'''<?xml version="1.0"?>
 
 
 class FdsnTest(unittest.TestCase):
+    def test_agency_uri_preserves_uri_and_normalizes_unknown_code(self):
+        self.assertEqual(agency_uri("https://example.test/agency"), "https://example.test/agency")
+        self.assertEqual(
+            agency_uri("LOCAL AGENCY"),
+            "https://seismic.balog.jp/resource/organization/LOCAL%20AGENCY",
+        )
+
     def test_quakeml_preferred_values_and_legacy_uri(self):
         parsed = FdsnQuakeMlParser("https://example.test/query.xml").parse_bytes(QUAKEML)
         self.assertEqual(parsed.issues, [])
@@ -37,7 +45,9 @@ class FdsnTest(unittest.TestCase):
         self.assertEqual(event.latitude, Decimal("-25.742"))
         self.assertEqual(event.magnitude, Decimal("4.9"))
         self.assertEqual(event.catalog, "ISC")
-        self.assertEqual(event.determination_method, "NEIC")
+        self.assertIsNone(event.determination_method)
+        self.assertEqual(event.determined_by_uri, "https://www.isc.ac.uk/")
+        self.assertEqual(event.origin_time.isoformat(), "2003-12-31T23:51:57.760000+00:00")
 
     def test_stationxml_uses_existing_station_uri_shape(self):
         parsed = FdsnStationXmlParser("https://example.test/stations.xml").parse_bytes(STATIONXML)

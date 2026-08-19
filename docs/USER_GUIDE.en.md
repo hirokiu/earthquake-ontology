@@ -91,6 +91,14 @@ earthquake-rdf-convert fdsn-events events-2025.xml \
 Choose `turtle`, `ntriples`, or `nquads` with `--output-format`. N-Quads output
 requires `--graph-uri`.
 
+Use `--split-by-entity` to replace the mixed RDF file with three outputs:
+`*-hypocenters`, `*-stations`, and `*-observed-waves` (including J-SHIS
+strong-motion records). Across networks, the URI-valued
+`jpe:detarminatedBy` identifies the organization that determined a hypocenter;
+`jpe:determinatedWay` is reserved for the determination method or source flag.
+Known organizations use official URIs, while unknown agency codes receive
+stable local URIs.
+
 ### 4.1 JMA provisional daily hypocenters
 
 ```bash
@@ -139,16 +147,49 @@ earthquake-rdf-convert fdsn-stations stations.xml stations.ttl \
   --source-uri 'https://service.earthscope.org/fdsnws/station/1/query?...'
 ```
 
-A global station response is large, so `fdsn_stations_earthscope` is disabled by
-default. Enable it in deployment YAML only after constraining its URL by network
-or time range.
+`fdsn_stations_earthscope` retrieves the global station-level StationXML. Narrow
+the deployment YAML query by network or time range when appropriate.
 
-### 4.5 J-SHIS ground-motion flat file
+### 4.5 JMA intensity stations
+
+`code_p.zip` is the identifier-bearing base dataset. Supplying the official
+detailed HTML table also merges exact addresses and JMA region names. Station
+URIs match `jpe:observedBy` in the monthly intensity observations.
+
+```bash
+earthquake-rdf-convert jma-stations code_p.zip \
+  --source-uri https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip \
+  --details-html jma-shindo-current.html \
+  --details-source-uri https://www.data.jma.go.jp/eqev/data/kyoshin/jma-shindo.html \
+  --split-by-entity --enrich-addresses
+```
+
+### 4.6 J-SHIS ground-motion flat file
 
 ```bash
 earthquake-rdf-convert jshis-flatfile flatfile-v2024.zip flatfile-v2024.ttl \
   --source-uri https://www.j-shis.bosai.go.jp/labs/ground-motion-flatfile/data/v2024/flatfile-v2024.zip
 ```
+
+Use `--split-by-year` to retain the complete file and also create one file per
+earthquake origin year. For example, `flatfile-v2024.ttl` is accompanied by files
+such as `flatfile-v2024-1996.ttl`. Each yearly file contains that year's
+hypocenters, related strong-motion records, and the stations referenced by those
+records.
+
+```bash
+earthquake-rdf-convert jshis-flatfile flatfile-v2024.zip \
+  --source-uri https://www.j-shis.bosai.go.jp/labs/ground-motion-flatfile/data/v2024/flatfile-v2024.zip \
+  --split-by-year --split-by-entity --enrich-addresses
+```
+
+Combining `--split-by-year` and `--split-by-entity` produces the three
+entity-specific outputs for both the complete period and every origin year.
+
+Date-times are emitted as timezone-aware `xsd:dateTime` values. JMA and J-SHIS
+use Japan Standard Time (for example, `2024-01-02T03:04:05+09:00`). FDSN/QuakeML
+preserves the source offset, with `Z` serialized as `+00:00`. The domain model
+rejects timezone-naive values.
 
 The parser reads `site_schema.tsv`, `source_schema.tsv`, and `smrec_schema.tsv`
 inside the ZIP and converts K-NET/KiK-net stations, hypocenters, and core

@@ -66,6 +66,7 @@ class JmaDailyHypocenterParser:
                     uri=self.resource_base + quote(record_id), origin_time=origin,
                     latitude=lat, longitude=lon, depth_m=depth, magnitude=magnitude,
                     magnitude_type="Mj", label_ja=region, catalog="JMA daily provisional",
+                    determined_by_uri="https://www.jma.go.jp/jma/",
                     source_uri=self.source_uri,
                 ))
             except (ValueError, ArithmeticError) as exc:

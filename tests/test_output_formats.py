@@ -41,6 +41,35 @@ class OutputFormatTest(unittest.TestCase):
             dataset = Dataset().parse(output, format="nquads")
             self.assertGreater(len(dataset.graph(URIRef("https://example.test/graph/events"))), 0)
 
+    def test_split_by_entity_uses_descriptive_suffix(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source, output = root / "events.xml", root / "usgs.ttl"
+            source.write_bytes(QUAKEML)
+            self.assertEqual(convert_main([
+                "fdsn-events", str(source), str(output),
+                "--source-uri", "https://example.test/events.xml", "--split-by-entity",
+            ]), 0)
+            separated = root / "usgs-hypocenters.ttl"
+            self.assertTrue(separated.exists())
+            self.assertFalse(output.exists())
+            self.assertGreater(len(Graph().parse(separated, format="turtle")), 0)
+
+    def test_split_does_not_duplicate_existing_entity_suffix(self):
+        from earthquake_ontology.cli import _entity_path
+
+        output = Path("jma-daily-hypocenters-20260818.ttl")
+        self.assertEqual(_entity_path(output, "hypocenters"), output)
+
+    def test_turtle_uses_schema_prefix_without_numeric_suffix(self):
+        from earthquake_ontology.rdf_builder import RdfBuilder
+
+        graph = RdfBuilder().new_graph()
+        graph.add((URIRef("https://example.test/s"), URIRef("http://schema.org/identifier"), URIRef("https://example.test/o")))
+        turtle = graph.serialize(format="turtle")
+        self.assertIn("@prefix schema:", turtle)
+        self.assertNotIn("schema1:", turtle)
+
     def test_organizer_records_reversible_moves(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory) / "data"

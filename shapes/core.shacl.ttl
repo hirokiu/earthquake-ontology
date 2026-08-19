@@ -13,6 +13,7 @@ jpe:HypocenterShape a sh:NodeShape ;
     sh:property [ sh:path schema:longitude ; sh:minCount 1 ; sh:maxCount 1 ; sh:minInclusive -180 ; sh:maxInclusive 180 ] ;
     sh:property [ sh:path jpe:depth ; sh:maxCount 1 ] ;
     sh:property [ sh:path jpe:magnitude ; sh:maxCount 1 ] ;
+    sh:property [ sh:path jpe:detarminatedBy ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
     sh:property [
         sh:path [ sh:alternativePath ( prov:wasDerivedFrom dcterms:source ) ] ;
         sh:minCount 1 ;
@@ -27,6 +28,13 @@ jpe:ObservedWaveShape a sh:NodeShape ;
     sh:property [ sh:path jpe:hasHypocenter ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jpe:hypocenter ] ;
     sh:property [ sh:path jpe:observedBy ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jpe:observer ] ;
     sh:property [ sh:path jpe:calcShindo ; sh:maxCount 1 ; sh:datatype xsd:decimal ] .
+
+jpe:StrongMotionRecordShape a sh:NodeShape ;
+    sh:targetClass jpe:StrongMotionRecord ;
+    sh:property [ sh:path schema:identifier ; sh:minCount 1 ; sh:maxCount 1 ] ;
+    sh:property [ sh:path jpe:recordIdentifier ; sh:minCount 1 ; sh:maxCount 1 ] ;
+    sh:property [ sh:path jpe:hasHypocenter ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jpe:hypocenter ] ;
+    sh:property [ sh:path jpe:observedBy ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jpe:observer ] .
 
 jpe:StationShape a sh:NodeShape ;
     sh:targetClass jpe:observer ;

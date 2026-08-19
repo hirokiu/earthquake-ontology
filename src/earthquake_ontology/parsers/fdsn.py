@@ -9,6 +9,7 @@ from urllib.parse import quote
 from xml.etree import ElementTree as ET
 
 from ..model import Hypocenter, ParseIssue, ParsedDataset, Station, StationAddress
+from .base import agency_uri
 
 
 def _local(tag: str) -> str:
@@ -99,14 +100,16 @@ class FdsnQuakeMlParser:
                 descriptions = _children(event, "description")
                 label = next((_text(item, "text") for item in descriptions if _text(item, "text")), None)
                 catalog = _text(origin, "creationInfo/agencyID") or _text(origin, "creationInfo/author")
-                determiner = (_text(magnitude, "creationInfo/agencyID") or _text(magnitude, "creationInfo/author")) if magnitude is not None else None
+                origin_agency = _text(origin, "creationInfo/agencyID") or _text(origin, "creationInfo/author")
+                determination_method = _text(origin, "evaluationMode") or _text(origin, "methodID")
                 depth = _decimal(origin, "depth/value")
                 result.hypocenters.append(Hypocenter(
                     uri=_event_uri(public_id), origin_time=_instant(_text(origin, "time/value")),
                     latitude=_decimal(origin, "latitude/value"), longitude=_decimal(origin, "longitude/value"),
                     depth_m=depth, magnitude=_decimal(magnitude, "mag/value") if magnitude is not None else None,
                     magnitude_type=_text(magnitude, "type") if magnitude is not None else None,
-                    label_en=label, catalog=catalog, determination_method=determiner,
+                    label_en=label, catalog=catalog, determination_method=determination_method,
+                    determined_by_uri=agency_uri(origin_agency),
                     source_uri=self.source_uri,
                 ))
             except (ValueError, InvalidOperation, TypeError) as exc:

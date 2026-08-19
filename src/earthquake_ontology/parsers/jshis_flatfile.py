@@ -115,19 +115,28 @@ class JshisFlatFileParser:
                     magnitude=_decimal(row.get("mjma")), magnitude_type="Mj",
                     label_ja=(row.get("eq_event_name") or "").strip() or None,
                     catalog="J-SHIS ground-motion flat file", source_uri=self.source_uri,
+                    determined_by_uri="https://www.jma.go.jp/jma/",
                 ))
             except (ValueError, InvalidOperation, TypeError) as exc:
                 result.issues.append(ParseIssue(line, "invalid_source", str(exc), repr(row)))
 
     def _records(self, text, result: ParsedDataset) -> None:
+        station_ids = {station.identifier for station in result.stations}
         for line, row in enumerate(self._rows(text), 2):
             try:
                 identifier = (row.get("smrec_id") or "").strip()
                 site_id = (row.get("site_id") or "").strip()
+                # smrec_schema uses an additional trailing site-history digit,
+                # while site_schema identifies the corresponding station with
+                # siteid2. Keep exact matches for compatibility with fixtures
+                # and older flat-file versions.
+                station_id = site_id
+                if station_id not in station_ids and station_id[:-1] in station_ids:
+                    station_id = station_id[:-1]
                 source_id = (row.get("eq_source_id") or "").strip()
                 result.strong_motion_records.append(StrongMotionRecord(
                     uri=BASE + "record/" + quote(identifier), identifier=identifier,
-                    station_uri=BASE + "station/" + quote(site_id),
+                    station_uri=BASE + "station/" + quote(station_id),
                     hypocenter_uri=BASE + "source/" + quote(source_id), source_uri=self.source_uri,
                     file_basename=(row.get("filebasename") or "").strip() or None,
                     sample_count=_integer(row.get("length")), sampling_frequency_hz=_decimal(row.get("samplefreq")),

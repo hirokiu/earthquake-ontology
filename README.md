@@ -91,6 +91,21 @@ When the output path is omitted, files are stored below
 index that preserves named graphs. Automatic filenames include both provider
 and dataset type, for example `usgs-fdsn-events-1960.nq`.
 
+J-SHIS conversion supports `--split-by-year`, which retains the complete output
+and adds self-contained files for each earthquake origin year. JMA and J-SHIS
+timestamps carry the JST `+09:00` offset; FDSN timestamps preserve the offset
+supplied by QuakeML (`Z` is serialized as `+00:00`).
+
+All converters support `--split-by-entity`. It replaces a mixed RDF output with
+separate `*-hypocenters`, `*-stations`, and `*-observed-waves` files; the last
+category includes J-SHIS strong-motion records. It can be combined with
+`--split-by-year`. Hypocenters use the URI-valued `jpe:detarminatedBy` property
+for the organization that determined the solution, while
+`jpe:determinatedWay` is reserved for the determination method or source flag.
+Generated Turtle binds the established `http://schema.org/` vocabulary exactly
+as `schema:`; RDFLib's conflicting default binding is replaced so `schema1:` is
+never emitted.
+
 ## License and attribution
 
 The ontology is distributed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).

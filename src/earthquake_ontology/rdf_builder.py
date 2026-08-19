@@ -27,12 +27,16 @@ class RdfBuilder:
             ("dcat", DCAT), ("dcterms", DCTERMS), ("ic", IC), ("jpe", JPE),
             ("prov", PROV), ("schema", SCHEMA), ("skos", SKOS),
         ):
-            graph.bind(prefix, namespace)
+            # RDFLib pre-binds ``schema`` to https://schema.org/. This project
+            # uses the established http://schema.org/ vocabulary URI, so
+            # replace the default binding instead of emitting ``schema1``.
+            graph.bind(prefix, namespace, override=True, replace=True)
         return graph
 
     def add_hypocenter(self, graph: Graph, item: Hypocenter) -> URIRef:
         subject = URIRef(item.uri)
         graph.add((subject, RDF.type, JPE.hypocenter))
+        graph.add((subject, SCHEMA.identifier, Literal(item.uri.rsplit("/", 1)[-1])))
         graph.add((subject, JPE.originTime, _datetime(item.origin_time)))
         graph.add((subject, SCHEMA.latitude, _decimal(item.latitude)))
         graph.add((subject, SCHEMA.longitude, _decimal(item.longitude)))
@@ -55,6 +59,8 @@ class RdfBuilder:
         ):
             if value is not None:
                 graph.add((subject, predicate, Literal(value)))
+        if item.determined_by_uri is not None:
+            graph.add((subject, JPE.detarminatedBy, URIRef(item.determined_by_uri)))
         if item.observed_station_count is not None:
             graph.add((subject, JPE.observedStationNum, Literal(item.observed_station_count, datatype=XSD.nonNegativeInteger)))
         return subject
@@ -62,6 +68,7 @@ class RdfBuilder:
     def add_observation(self, graph: Graph, item: Observation) -> URIRef:
         subject = URIRef(item.uri)
         graph.add((subject, RDF.type, JPE.observedWave))
+        graph.add((subject, SCHEMA.identifier, Literal(item.uri.rsplit("/", 1)[-1])))
         graph.add((subject, SCHEMA.startTime, _datetime(item.start_time)))
         graph.add((subject, JPE.hasHypocenter, URIRef(item.hypocenter_uri)))
         graph.add((subject, JPE.observedBy, URIRef(item.station_uri)))
@@ -76,9 +83,14 @@ class RdfBuilder:
         subject = URIRef(item.uri)
         graph.add((subject, RDF.type, JPE.observer))
         graph.add((subject, JPE.stationIdentifier, Literal(item.identifier)))
+        graph.add((subject, SCHEMA.identifier, Literal(item.identifier)))
         graph.add((subject, SCHEMA.latitude, _decimal(item.latitude)))
         graph.add((subject, SCHEMA.longitude, _decimal(item.longitude)))
         graph.add((subject, PROV.wasDerivedFrom, URIRef(item.source_uri)))
+        for source_uri in item.additional_source_uris:
+            graph.add((subject, PROV.wasDerivedFrom, URIRef(source_uri)))
+        if item.region:
+            graph.add((subject, SCHEMA.spatial, Literal(item.region, lang="ja")))
         if item.label_ja:
             graph.add((subject, RDFS.label, Literal(item.label_ja, lang="ja")))
             graph.add((subject, SKOS.prefLabel, Literal(item.label_ja, lang="ja")))
@@ -125,6 +137,7 @@ class RdfBuilder:
         subject = URIRef(item.uri)
         graph.add((subject, RDF.type, JPE.StrongMotionRecord))
         graph.add((subject, JPE.recordIdentifier, Literal(item.identifier)))
+        graph.add((subject, SCHEMA.identifier, Literal(item.identifier)))
         graph.add((subject, JPE.observedBy, URIRef(item.station_uri)))
         graph.add((subject, JPE.hasHypocenter, URIRef(item.hypocenter_uri)))
         graph.add((subject, PROV.wasDerivedFrom, URIRef(item.source_uri)))
@@ -159,3 +172,22 @@ class RdfBuilder:
         for item in data.strong_motion_records:
             self.add_strong_motion_record(graph, item)
         return graph
+
+    def iter_entity_graphs(self, data: ParsedDataset):
+        if data.hypocenters:
+            graph = self.new_graph()
+            for item in data.hypocenters:
+                self.add_hypocenter(graph, item)
+            yield "hypocenters", graph
+        if data.stations:
+            graph = self.new_graph()
+            for item in data.stations:
+                self.add_station(graph, item)
+            yield "stations", graph
+        if data.observations or data.strong_motion_records:
+            graph = self.new_graph()
+            for item in data.observations:
+                self.add_observation(graph, item)
+            for item in data.strong_motion_records:
+                self.add_strong_motion_record(graph, item)
+            yield "observed-waves", graph

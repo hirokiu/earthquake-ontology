@@ -33,6 +33,7 @@ class Hypocenter:
     magnitude_type: str | None = None
     catalog: str | None = None
     determination_method: str | None = None
+    determined_by_uri: str | None = None
     record_type: str | None = None
     maximum_intensity: str | None = None
     observed_station_count: int | None = None
@@ -42,6 +43,8 @@ class Hypocenter:
         _validate_uri(self.uri, "uri")
         _validate_uri(self.source_uri, "source_uri")
         _validate_datetime(self.origin_time, "origin_time")
+        if self.determined_by_uri is not None:
+            _validate_uri(self.determined_by_uri, "determined_by_uri")
         if not Decimal("-90") <= self.latitude <= Decimal("90"):
             raise ValueError("latitude must be between -90 and 90")
         if not Decimal("-180") <= self.longitude <= Decimal("180"):
@@ -98,10 +101,14 @@ class Station:
     available_from: datetime | None = None
     available_until: datetime | None = None
     address: StationAddress | None = None
+    region: str | None = None
+    additional_source_uris: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         _validate_uri(self.uri, "uri")
         _validate_uri(self.source_uri, "source_uri")
+        for source_uri in self.additional_source_uris:
+            _validate_uri(source_uri, "additional_source_uris")
         if not self.identifier.strip():
             raise ValueError("identifier must not be empty")
         if not Decimal("-90") <= self.latitude <= Decimal("90"):

@@ -56,7 +56,7 @@ jpe:DatasetSnapshot a owl:Class ;
 jpe:StrongMotionRecord a owl:Class ;
     rdfs:label "強震記録"@ja , "strong-motion record"@en ;
     rdfs:comment "観測点で得られた強震波形またはそこから算出した主要指標を表す。"@ja ;
-    rdfs:subClassOf jpe:observedWave .
+    rdfs:subClassOf sosa:Observation .
 
 # Datatype properties used by the published JMA and FDSN datasets
 jpe:originTime a owl:DatatypeProperty ;
@@ -94,7 +94,7 @@ jpe:catalog a owl:DatatypeProperty ;
 
 jpe:determinatedWay a owl:DatatypeProperty ;
     rdfs:label "震源決定方法"@ja , "hypocenter determination method"@en ;
-    rdfs:comment "震源の決定方法、決定フラグ、または決定機関。"@ja ;
+    rdfs:comment "震源の決定方法または決定フラグ。震源を決定した機関はjpe:detarminatedByで表す。"@ja ;
     rdfs:domain jpe:hypocenter ; rdfs:range xsd:string .
 
 jpe:hypocenterKinds a owl:DatatypeProperty ;
@@ -143,6 +143,12 @@ jpe:hasHypocenter a owl:ObjectProperty ;
 jpe:isHypocenterOf a owl:ObjectProperty ;
     rdfs:label "震源とする地震・観測"@ja , "is hypocenter of"@en ;
     rdfs:domain jpe:hypocenter .
+
+jpe:detarminatedBy a owl:ObjectProperty ;
+    rdfs:label "震源決定機関"@ja , "hypocenter determined by"@en ;
+    rdfs:comment "震源位置・時刻を決定した機関をURIで示す。決定方法やフラグはjpe:determinatedWayで表す。"@ja ;
+    rdfs:domain jpe:hypocenter ; rdfs:range prov:Agent ;
+    rdfs:subPropertyOf prov:wasAttributedTo .
 
 jpe:observedBy a owl:ObjectProperty ;
     rdfs:label "観測した観測点"@ja , "observed by"@en ;

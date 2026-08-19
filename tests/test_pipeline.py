@@ -68,6 +68,7 @@ class JmaPipelineTest(unittest.TestCase):
         self.assertEqual(event.magnitude, Decimal("3.2"))
         self.assertEqual(event.observed_station_count, 1)
         self.assertEqual(event.determination_method, "気象庁震源")
+        self.assertEqual(event.determined_by_uri, "https://www.jma.go.jp/jma/")
 
         observation = result.observations[0]
         self.assertEqual(observation.calculated_intensity, Decimal("0.5"))
@@ -103,6 +104,8 @@ class JmaPipelineTest(unittest.TestCase):
         self.assertIn((event, PROV.wasDerivedFrom, URIRef(self.source_uri)), graph)
         origin = graph.value(event, JPE.originTime)
         self.assertEqual(origin.datatype, XSD.dateTime)
+        self.assertEqual(str(origin), "2019-01-01T04:04:28.540000+09:00")
+        self.assertEqual(str(graph.value(event, JPE.detarminatedBy)), "https://www.jma.go.jp/jma/")
         station = URIRef("https://seismic.balog.jp/resource/sta-1670022")
         self.assertEqual(str(graph.value(station, URIRef("http://schema.org/address"))), "北海道石狩市")
         self.assertEqual(str(graph.value(station, URIRef("http://imi.go.jp/ns/core/rdf#都道府県"))), "北海道")

@@ -89,6 +89,12 @@ earthquake-rdf-convert fdsn-events events-2025.xml \
 `--output-format`は`turtle`、`ntriples`、`nquads`から選択できます。`nquads`では
 `--graph-uri`が必須です。
 
+`--split-by-entity`を指定すると、混在ファイルの代わりに`*-hypocenters`（震源）、
+`*-stations`（観測点）、`*-observed-waves`（観測波形・強震記録）の3種類へ分割します。
+各観測網で共通して、震源決定機関はURI値の`jpe:detarminatedBy`、決定方法や原本フラグは
+`jpe:determinatedWay`で表します。既知の機関には公式URIを使用し、未知の機関コードにも
+安定したローカルURIを割り当てます。
+
 ### 4.1 気象庁日別暫定震源リスト
 
 ```bash
@@ -137,21 +143,52 @@ earthquake-rdf-convert fdsn-stations stations.xml stations.ttl \
   --source-uri 'https://service.earthscope.org/fdsnws/station/1/query?...'
 ```
 
-全世界の観測点応答は大きいため、`fdsn_stations_earthscope`は既定で無効です。運用用YAMLで
-ネットワークや期間を限定したURLを設定してから有効化してください。
+`fdsn_stations_earthscope`は全世界のstationレベルStationXMLを取得します。必要に応じて
+運用用YAMLでネットワークや期間を限定してください。
 
-### 4.5 J-SHIS強震動フラットファイル
+### 4.5 気象庁震度観測点
+
+`code_p.zip`を基本データとし、公式の詳細一覧HTMLを指定すると所在地と地域名称も統合します。
+観測点URIは月次震度観測レコードの`jpe:observedBy`と一致します。
+
+```bash
+earthquake-rdf-convert jma-stations code_p.zip \
+  --source-uri https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip \
+  --details-html jma-shindo-current.html \
+  --details-source-uri https://www.data.jma.go.jp/eqev/data/kyoshin/jma-shindo.html \
+  --split-by-entity --enrich-addresses
+```
+
+### 4.6 J-SHIS強震動フラットファイル
 
 ```bash
 earthquake-rdf-convert jshis-flatfile flatfile-v2024.zip flatfile-v2024.ttl \
   --source-uri https://www.j-shis.bosai.go.jp/labs/ground-motion-flatfile/data/v2024/flatfile-v2024.zip
 ```
 
+全体ファイルに加えて地震発生年ごとのファイルを作る場合は`--split-by-year`を指定します。
+例えば出力が`flatfile-v2024.ttl`なら、同じ場所に`flatfile-v2024-1996.ttl`のような
+年別ファイルを生成します。各年版には、その年の震源、関連する強震記録、およびそれらが参照する
+観測点が含まれます。
+
+```bash
+earthquake-rdf-convert jshis-flatfile flatfile-v2024.zip \
+  --source-uri https://www.j-shis.bosai.go.jp/labs/ground-motion-flatfile/data/v2024/flatfile-v2024.zip \
+  --split-by-year --split-by-entity --enrich-addresses
+```
+
+`--split-by-year`と`--split-by-entity`を併用すると、全期間版と各年版の双方を3種類の
+エンティティ別ファイルとして生成します。
+
+日時は`xsd:dateTime`としてタイムゾーン付きで出力します。気象庁とJ-SHISの日時は日本標準時
+（例：`2024-01-02T03:04:05+09:00`）、FDSN/QuakeMLは入力のオフセットを保持し、`Z`は
+`+00:00`として出力します。タイムゾーンのない日時はモデル層で拒否されます。
+
 ZIP内の`site_schema.tsv`、`source_schema.tsv`、`smrec_schema.tsv`を読み、K-NET/KiK-net観測点、
 震源、主要強震指標を変換します。現在はRDFグラフをメモリに保持するため、約2 GBのフル版では
 十分なメモリを確保してください。公開時はDOI `10.17598/NIED.0032`などの出典が必要です。
 
-### 4.6 不正レコード
+### 4.7 不正レコード
 
 不正レコードがあると既定では変換を停止します。調査時に限り`--allow-issues`を指定すると、
 不正レコードを標準エラーへJSON Linesで出力し、正常レコードだけを書き出します。

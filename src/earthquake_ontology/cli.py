@@ -18,10 +18,11 @@ from . import __version__
 from .address_enrichment import GsiAddressEnricher
 from .model import DatasetSnapshot
 from .parsers import (
-    FdsnQuakeMlParser, FdsnStationXmlParser, JmaDailyHypocenterParser,
+    FdsnQuakeMlParser, FdsnStationXmlParser, JmaDailyHypocenterParser, JmaStationCodeParser,
     JmaIntensityParser, JshisFlatFileParser,
 )
 from .rdf_builder import RdfBuilder
+from .parsers.jma_station_details import merge_jma_station_details
 
 
 OUTPUT_FORMATS = {
@@ -52,6 +53,7 @@ def _output_path(args: argparse.Namespace) -> Path:
         "fdsn-stations": ("earthscope-fdsn-stations", ("stations-", "station-")),
         "jma-daily": ("jma-daily-hypocenters", ("daily-",)),
         "jma-intensity": ("jma-monthly-intensity", ()),
+        "jma-stations": ("jma-intensity-stations", ("code_p", "code-p")),
         "jshis-flatfile": ("jshis-ground-motion-flatfile", ("flatfile-",)),
     }
     prefix, removable = prefixes[args.command]
@@ -92,6 +94,38 @@ def _write_graph(
             temporary.unlink()
 
 
+def _entity_path(output: Path, entity: str) -> Path:
+    if entity == "hypocenters" and "-hypocenters" in output.stem:
+        return output
+    return output.with_name(f"{output.stem}-{entity}{output.suffix}")
+
+
+def _planned_dataset_paths(parsed, output: Path, split_by_entity: bool) -> list[Path]:
+    if not split_by_entity:
+        return [output]
+    entities = []
+    if parsed.hypocenters:
+        entities.append("hypocenters")
+    if parsed.stations:
+        entities.append("stations")
+    if parsed.observations or parsed.strong_motion_records:
+        entities.append("observed-waves")
+    return [_entity_path(output, name) for name in entities]
+
+
+def _write_dataset(parsed, args: argparse.Namespace, output: Path, graph_uri: str | None = None) -> None:
+    builder = RdfBuilder()
+    if not args.split_by_entity:
+        _write_graph(builder.build_dataset(parsed), output, args.force, args.output_format, graph_uri)
+        print(output)
+        return
+    for entity, graph in builder.iter_entity_graphs(parsed):
+        destination = _entity_path(output, entity)
+        entity_graph_uri = f"{graph_uri.rstrip('/')}/{entity}" if graph_uri else None
+        _write_graph(graph, destination, args.force, args.output_format, entity_graph_uri)
+        print(destination)
+
+
 def convert_jma_intensity(args: argparse.Namespace) -> int:
     args.output = _output_path(args)
     if args.snapshot_output:
@@ -121,7 +155,7 @@ def convert_jma_intensity(args: argparse.Namespace) -> int:
             return 2
 
     builder = RdfBuilder()
-    _write_graph(builder.build_dataset(parsed), args.output, args.force, args.output_format, args.graph_uri)
+    _write_dataset(parsed, args, args.output, args.graph_uri)
 
     if args.snapshot_output:
         snapshot = DatasetSnapshot(
@@ -137,11 +171,18 @@ def convert_jma_intensity(args: argparse.Namespace) -> int:
         metadata = builder.new_graph()
         builder.add_snapshot(metadata, snapshot)
         _write_graph(metadata, args.snapshot_output, args.force)
-    print(args.output)
     return 0
 
 
 def _convert_parsed(parsed, args: argparse.Namespace) -> int:
+    if not _prepare_parsed(parsed, args):
+        return 2
+    output = _output_path(args)
+    _write_dataset(parsed, args, output, args.graph_uri)
+    return 0
+
+
+def _prepare_parsed(parsed, args: argparse.Namespace) -> bool:
     if getattr(args, "clear_address_cache", False) and not getattr(args, "enrich_addresses", False):
         raise ValueError("--clear-address-cache requires --enrich-addresses")
     if getattr(args, "enrich_addresses", False):
@@ -161,11 +202,8 @@ def _convert_parsed(parsed, args: argparse.Namespace) -> int:
             print(json.dumps(asdict(issue), ensure_ascii=False), file=sys.stderr)
         if not args.allow_issues:
             print("conversion aborted because invalid records were found", file=sys.stderr)
-            return 2
-    output = _output_path(args)
-    _write_graph(RdfBuilder().build_dataset(parsed), output, args.force, args.output_format, args.graph_uri)
-    print(output)
-    return 0
+            return False
+    return True
 
 
 def convert_jma_daily(args: argparse.Namespace) -> int:
@@ -176,7 +214,48 @@ def convert_jma_daily(args: argparse.Namespace) -> int:
 
 def convert_jshis_flatfile(args: argparse.Namespace) -> int:
     parsed = JshisFlatFileParser(args.source_uri).parse_zip(args.input)
-    return _convert_parsed(parsed, args)
+    if not args.split_by_year:
+        return _convert_parsed(parsed, args)
+    if not _prepare_parsed(parsed, args):
+        return 2
+
+    output = _output_path(args)
+    by_year = _split_jshis_by_year(parsed)
+    year_outputs = {
+        year: output.with_name(f"{output.stem}-{year}{output.suffix}")
+        for year in by_year
+    }
+    planned = _planned_dataset_paths(parsed, output, args.split_by_entity)
+    for year, dataset in by_year.items():
+        planned.extend(_planned_dataset_paths(dataset, year_outputs[year], args.split_by_entity))
+    existing = [path for path in planned if path.exists()]
+    if existing and not args.force:
+        raise FileExistsError(f"output already exists: {existing[0]}; pass --force to replace it")
+
+    _write_dataset(parsed, args, output, args.graph_uri)
+    for year, dataset in by_year.items():
+        graph_uri = f"{args.graph_uri.rstrip('/')}/{year}" if args.graph_uri else None
+        _write_dataset(dataset, args, year_outputs[year], graph_uri)
+    return 0
+
+
+def _split_jshis_by_year(parsed):
+    years = sorted({item.origin_time.year for item in parsed.hypocenters})
+    result = {}
+    for year in years:
+        hypocenters = [item for item in parsed.hypocenters if item.origin_time.year == year]
+        hypocenter_uris = {item.uri for item in hypocenters}
+        observations = [item for item in parsed.observations if item.hypocenter_uri in hypocenter_uris]
+        records = [item for item in parsed.strong_motion_records if item.hypocenter_uri in hypocenter_uris]
+        station_uris = {item.station_uri for item in observations}
+        station_uris.update(item.station_uri for item in records)
+        result[year] = type(parsed)(
+            hypocenters=hypocenters,
+            observations=observations,
+            stations=[item for item in parsed.stations if item.uri in station_uris],
+            strong_motion_records=records,
+        )
+    return result
 
 
 def convert_fdsn_events(args: argparse.Namespace) -> int:
@@ -189,7 +268,22 @@ def convert_fdsn_stations(args: argparse.Namespace) -> int:
     return _convert_parsed(parsed, args)
 
 
+def convert_jma_stations(args: argparse.Namespace) -> int:
+    parsed = JmaStationCodeParser(args.source_uri).parse_zip(args.input)
+    if args.details_html:
+        if not args.details_source_uri:
+            raise ValueError("--details-source-uri is required with --details-html")
+        parsed.stations = merge_jma_station_details(
+            parsed.stations, args.details_html, args.details_source_uri,
+        )
+    return _convert_parsed(parsed, args)
+
+
 def _add_output_options(parser: argparse.ArgumentParser, include_graph_uri: bool = True) -> None:
+    parser.add_argument(
+        "--split-by-entity", action="store_true",
+        help="write separate hypocenters, stations, and observed-waves files instead of one mixed file",
+    )
     parser.add_argument(
         "--output-format", choices=tuple(OUTPUT_FORMATS), default="turtle",
         help="RDF serialization (default: turtle; QLever also accepts ntriples and nquads)",
@@ -256,6 +350,10 @@ def build_parser() -> argparse.ArgumentParser:
     flat.add_argument("--source-uri", required=True)
     flat.add_argument("--allow-issues", action="store_true")
     flat.add_argument("--force", action="store_true")
+    flat.add_argument(
+        "--split-by-year", action="store_true",
+        help="write the complete dataset and additional self-contained files for each event year",
+    )
     _add_output_options(flat)
     _add_address_options(flat)
     flat.set_defaults(handler=convert_jshis_flatfile)
@@ -276,6 +374,17 @@ def build_parser() -> argparse.ArgumentParser:
     _add_output_options(stations)
     _add_address_options(stations)
     stations.set_defaults(handler=convert_fdsn_stations)
+    jma_stations = subparsers.add_parser("jma-stations", help="convert the JMA intensity-station code ZIP")
+    jma_stations.add_argument("input", type=Path)
+    jma_stations.add_argument("output", type=Path, nargs="?")
+    jma_stations.add_argument("--source-uri", required=True)
+    jma_stations.add_argument("--details-html", type=Path)
+    jma_stations.add_argument("--details-source-uri")
+    jma_stations.add_argument("--allow-issues", action="store_true")
+    jma_stations.add_argument("--force", action="store_true")
+    _add_output_options(jma_stations)
+    _add_address_options(jma_stations)
+    jma_stations.set_defaults(handler=convert_jma_stations)
     return parser
 
 
