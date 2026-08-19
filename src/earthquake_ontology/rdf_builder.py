@@ -4,11 +4,12 @@ from __future__ import annotations
 
 from datetime import timezone
 from decimal import Decimal
+from urllib.parse import quote
 
 from rdflib import Graph, Literal, RDF, RDFS, SKOS, URIRef, XSD
 
 from .model import DatasetSnapshot, Hypocenter, Observation, ParsedDataset, Station, StrongMotionRecord
-from .namespaces import DCAT, DCTERMS, JPE, PROV, SCHEMA
+from .namespaces import DCAT, DCTERMS, IC, JPE, PROV, SCHEMA
 
 
 def _decimal(value: Decimal) -> Literal:
@@ -23,7 +24,7 @@ class RdfBuilder:
     def new_graph(self) -> Graph:
         graph = Graph()
         for prefix, namespace in (
-            ("dcat", DCAT), ("dcterms", DCTERMS), ("jpe", JPE),
+            ("dcat", DCAT), ("dcterms", DCTERMS), ("ic", IC), ("jpe", JPE),
             ("prov", PROV), ("schema", SCHEMA), ("skos", SKOS),
         ):
             graph.bind(prefix, namespace)
@@ -91,6 +92,19 @@ class RdfBuilder:
             graph.add((subject, SCHEMA.availabilityStarts, _datetime(item.available_from)))
         if item.available_until:
             graph.add((subject, SCHEMA.availabilityEnds, _datetime(item.available_until)))
+        if item.address:
+            address = item.address
+            graph.add((subject, SCHEMA.address, Literal(address.full_address, lang=address.language)))
+            address_uri = address.address_uri or "https://uedayou.net/loa/" + quote(address.full_address, safe="")
+            graph.add((subject, IC["住所"], URIRef(address_uri)))
+            for predicate, value, language in (
+                (IC["都道府県"], address.prefecture, address.language),
+                (IC["都道府県コード"], address.prefecture_code, None),
+                (IC["市区町村"], address.municipality, address.language),
+                (IC["市区町村コード"], address.municipality_code, None),
+            ):
+                if value:
+                    graph.add((subject, predicate, Literal(value, lang=language)))
         return subject
 
     def add_snapshot(self, graph: Graph, item: DatasetSnapshot) -> URIRef:

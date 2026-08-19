@@ -24,7 +24,7 @@ QUAKEML = b'''<?xml version="1.0"?>
 
 STATIONXML = b'''<?xml version="1.0"?>
 <FDSNStationXML xmlns="http://www.fdsn.org/xml/station/1"><Network code="IU">
- <Station code="ANMO" startDate="1990-01-01T00:00:00Z"><Latitude>34.9459</Latitude><Longitude>-106.4572</Longitude><Elevation>1850</Elevation><Site><Name>Albuquerque</Name></Site></Station>
+ <Station code="ANMO" startDate="1990-01-01T00:00:00Z"><Latitude>34.9459</Latitude><Longitude>-106.4572</Longitude><Elevation>1850</Elevation><Site><Name>Albuquerque</Name><Country>USA</Country><Region>New Mexico</Region><Town>Albuquerque</Town></Site></Station>
 </Network></FDSNStationXML>'''
 
 
@@ -46,6 +46,7 @@ class FdsnTest(unittest.TestCase):
         self.assertEqual(station.uri, "https://seismic.balog.jp/resource/sta-FDSN-IU.ANMO")
         self.assertEqual(station.identifier, "IU.ANMO")
         self.assertEqual(station.label_en, "Albuquerque")
+        self.assertEqual(station.address.full_address, "Albuquerque, New Mexico, USA")
 
     def test_negative_depth_is_preserved(self):
         xml = QUAKEML.replace(b"<value>10000</value></depth>", b"<value>-1200</value></depth>")

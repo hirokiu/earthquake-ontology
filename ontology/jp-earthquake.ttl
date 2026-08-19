@@ -35,6 +35,7 @@ jpe:epicenter a owl:Class ;
 
 jpe:observer a owl:Class ;
     rdfs:label "観測点"@ja , "observation station"@en ;
+    rdfs:comment "住所が提供される場合はschema:addressとIMI共通語彙基盤（ic:住所、ic:都道府県、ic:都道府県コード、ic:市区町村、ic:市区町村コード）を併用する。"@ja ;
     skos:prefLabel "観測点"@ja , "observation station"@en ;
     rdfs:subClassOf sosa:Sensor .
 

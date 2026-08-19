@@ -11,6 +11,7 @@ Ontology準拠のRDF/Turtleへ変換します。取得原本は上書きせず�
 | コマンド | 用途 |
 | --- | --- |
 | `earthquake-data-fetch` | データの発見、取得、原本保存 |
+| `earthquake-data-organize` | 既存データを作成日別に整理 |
 | `earthquake-rdf-convert` | プロバイダー形式からTurtleへの変換 |
 | `earthquake-rdf-audit` | 大容量Turtleのストリーム検査 |
 
@@ -67,6 +68,26 @@ SHA-256ディレクトリへ保存され、過去版は残ります。`--force`�
 
 すべての変換で`--source-uri`に、入力原本またはAPIリクエストの正式なURIを指定します。
 出力ファイルが既に存在する場合は停止し、`--force`を指定した場合だけ置換します。
+
+出力パスを省略すると、ローカル日付または`--created-at`で指定した日付を使い、次の場所へ
+自動保存します。
+
+```text
+data/YYYY-MM-DD/{変換サブコマンド}/{出力形式}/{入力ファイル名}.{拡張子}
+```
+
+自動生成されるファイル名には、フォルダを見なくても判別できるように提供元とデータ種別が
+含まれます。例：`usgs-fdsn-events-1960.nq`、
+`jma-daily-hypocenters-20260817.ttl`。
+
+```bash
+earthquake-rdf-convert fdsn-events events-2025.xml \
+  --source-uri 'https://earthquake.usgs.gov/fdsnws/event/1/query?...' \
+  --output-format ntriples --created-at 2026-08-19
+```
+
+`--output-format`は`turtle`、`ntriples`、`nquads`から選択できます。`nquads`では
+`--graph-uri`が必須です。
 
 ### 4.1 気象庁日別暫定震源リスト
 
@@ -153,7 +174,39 @@ earthquake-rdf-audit output-directory/ --require-source --json
 公開前にはRDFパーサーによる構文解析と[`shapes/core.shacl.ttl`](../shapes/core.shacl.ttl)による
 SHACL検証も実施してください。
 
-## 6. 設定と認証情報
+## 6. QLeverへの投入
+
+QLeverの`qlever index`が直接受け付けるTurtle（`ttl`）、N-Triples（`nt`）、N-Quads（`nq`）に
+対応しています。名前付きグラフを維持する場合はN-Quadsを使用します。
+
+```bash
+earthquake-rdf-convert fdsn-events events-2025.xml \
+  --source-uri 'https://earthquake.usgs.gov/fdsnws/event/1/query?...' \
+  --output-format nquads \
+  --graph-uri https://seismic.balog.jp/graph/fdsn/usgs/2025/20260819
+
+qlever index --format nq \
+  --input-files 'data/2026-08-19/fdsn-events/nquads/*.nq'
+```
+
+大量データの初回投入や全件更新では、SPARQL `INSERT DATA`ではなくインデックス再構築を使用します。
+
+## 7. 既存dataディレクトリの整理
+
+実行前に移動計画を確認し、`--apply`で適用します。ファイルの作成日時が利用できない環境では
+更新日時を使用します。移動対応表は`data/_manifests/`に保存されます。
+
+```bash
+earthquake-data-organize --root data
+earthquake-data-organize --root data --apply
+earthquake-data-organize --root data --normalize-names
+earthquake-data-organize --root data --normalize-names --apply
+```
+
+`--normalize-names`は、既存ファイル名へ`jma-`、`fdsn-`、`knet-`、`aist-`などの提供元を
+表す接頭辞を付けます。名前変更の対応表も`data/_manifests/`へ保存されます。
+
+## 8. 設定と認証情報
 
 YAMLには秘密情報を記載しません。環境変数は`EQ_`接頭辞と`__`区切りでYAMLより優先されます。
 
@@ -170,7 +223,7 @@ K-NET/KiK-netの認証付き直接取得例は既定で無効です。私用設�
 earthquake-data-fetch --config config/production.yaml --source nied_knet_example
 ```
 
-## 7. 更新・公開運用
+## 9. 更新・公開運用
 
 外部データは過去分も訂正され得るため、差分SPARQL更新ではなく次の手順を使用します。
 
@@ -183,7 +236,53 @@ earthquake-data-fetch --config config/production.yaml --source nied_knet_example
 
 詳細は[`data-lifecycle.md`](data-lifecycle.md)を参照してください。
 
-## 8. 開発者向け検証
+## 10. 開発者向け検証
+
+### 観測点住所
+
+観測点の原データに住所または行政区画が含まれる場合、次の語彙を同時に出力します。
+
+```turtle
+@prefix schema: <http://schema.org/> .
+@prefix ic: <http://imi.go.jp/ns/core/rdf#> .
+
+<https://seismic.balog.jp/resource/example-station>
+    schema:address "北海道石狩市"@ja ;
+    ic:住所 <https://uedayou.net/loa/%E5%8C%97%E6%B5%B7%E9%81%93%E7%9F%B3%E7%8B%A9%E5%B8%82> ;
+    ic:都道府県 "北海道"@ja ;
+    ic:都道府県コード "01" ;
+    ic:市区町村 "石狩市"@ja ;
+    ic:市区町村コード "01235" .
+```
+
+住所が原データにない場合、観測点名から推測して住所を生成しません。緯度経度から補完する場合は、
+`fdsn-stations`または`jshis-flatfile`へ`--enrich-addresses`を指定します。
+
+```bash
+earthquake-rdf-convert jshis-flatfile flatfile-v2024.zip \
+  --source-uri https://www.j-shis.bosai.go.jp/labs/ground-motion-flatfile/data/v2024/flatfile-v2024.zip \
+  --enrich-addresses \
+  --address-cache var/cache/gsi-addresses.json \
+  --address-request-interval 0.2
+```
+
+日本付近の座標だけを国土地理院の逆ジオコーダーへ問い合わせ、市区町村コードを公式の
+`muni.js`と照合します。既存住所を上書きしません。結果・取得元URI・取得日時は座標単位で
+キャッシュされ、同じ座標の再実行ではネットワークへアクセスしません。該当住所がない場合も
+`not_found`としてキャッシュします。初回の大量補完では国土地理院へ過度な負荷を与えないよう、
+リクエスト間隔を短くしすぎないでください。
+
+取得ミスや行政区画の更新により全件を再取得する場合は、`--clear-address-cache`を
+`--enrich-addresses`と同時に指定します。既存キャッシュは
+`gsi-addresses.json.backup-{UTCタイムスタンプ}`へ退避されるため復旧可能です。自治体表と
+住所検索結果の両方が初期化されます。
+
+```bash
+earthquake-rdf-convert jshis-flatfile flatfile-v2024.zip \
+  --source-uri https://www.j-shis.bosai.go.jp/labs/ground-motion-flatfile/data/v2024/flatfile-v2024.zip \
+  --enrich-addresses --clear-address-cache \
+  --address-cache var/cache/gsi-addresses.json
+```
 
 ```bash
 python -m unittest discover -s tests -v

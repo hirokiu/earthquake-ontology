@@ -12,6 +12,7 @@ stored in an immutable SHA-256-addressed directory.
 | Command | Purpose |
 | --- | --- |
 | `earthquake-data-fetch` | Discover, download, and archive source artifacts |
+| `earthquake-data-organize` | Organize existing files by creation date |
 | `earthquake-rdf-convert` | Convert provider formats to Turtle |
 | `earthquake-rdf-audit` | Stream-audit large Turtle files |
 
@@ -69,6 +70,26 @@ ignores conditional-request metadata but does not overwrite archived bytes.
 Every converter requires `--source-uri`, which identifies the authoritative
 input artifact or API request. Existing output files are rejected unless
 `--force` is explicitly supplied.
+
+When the positional output is omitted, the local date or `--created-at` value is
+used to store the result automatically:
+
+```text
+data/YYYY-MM-DD/{converter}/{output-format}/{input-name}.{extension}
+```
+
+Automatically generated names contain the provider and dataset type, so they
+remain identifiable outside their directory. Examples include
+`usgs-fdsn-events-1960.nq` and `jma-daily-hypocenters-20260817.ttl`.
+
+```bash
+earthquake-rdf-convert fdsn-events events-2025.xml \
+  --source-uri 'https://earthquake.usgs.gov/fdsnws/event/1/query?...' \
+  --output-format ntriples --created-at 2026-08-19
+```
+
+Choose `turtle`, `ntriples`, or `nquads` with `--output-format`. N-Quads output
+requires `--graph-uri`.
 
 ### 4.1 JMA provisional daily hypocenters
 
@@ -161,7 +182,42 @@ The exit status is `0` when no finding is detected and `1` otherwise. Set
 publication also requires RDF parsing and SHACL validation with
 [`shapes/core.shacl.ttl`](../shapes/core.shacl.ttl).
 
-## 6. Configuration and credentials
+## 6. Loading data into QLever
+
+The output formats match the `ttl`, `nt`, and `nq` formats accepted by
+`qlever index`. Use N-Quads to preserve named graphs.
+
+```bash
+earthquake-rdf-convert fdsn-events events-2025.xml \
+  --source-uri 'https://earthquake.usgs.gov/fdsnws/event/1/query?...' \
+  --output-format nquads \
+  --graph-uri https://seismic.balog.jp/graph/fdsn/usgs/2025/20260819
+
+qlever index --format nq \
+  --input-files 'data/2026-08-19/fdsn-events/nquads/*.nq'
+```
+
+For initial bulk loading and complete refreshes, rebuild the index instead of
+sending a large SPARQL `INSERT DATA` request.
+
+## 7. Organizing an existing data directory
+
+Review the move plan first and apply it with `--apply`. The filesystem creation
+time is used when available, otherwise modification time is used. A reversible
+move manifest is retained below `data/_manifests/`.
+
+```bash
+earthquake-data-organize --root data
+earthquake-data-organize --root data --apply
+earthquake-data-organize --root data --normalize-names
+earthquake-data-organize --root data --normalize-names --apply
+```
+
+`--normalize-names` prefixes legacy names with a provider identifier such as
+`jma-`, `fdsn-`, `knet-`, or `aist-`. Its rename manifest is also retained under
+`data/_manifests/`.
+
+## 8. Configuration and credentials
 
 Do not store secrets in YAML. Environment variables use the `EQ_` prefix and
 `__` nesting delimiter and take precedence over YAML.
@@ -180,7 +236,7 @@ environment. Select another configuration file with `--config`:
 earthquake-data-fetch --config config/production.yaml --source nied_knet_example
 ```
 
-## 7. Update and publication workflow
+## 9. Update and publication workflow
 
 Because providers may revise historical records, use complete graph replacement
 instead of incremental SPARQL edits:
@@ -194,7 +250,43 @@ instead of incremental SPARQL edits:
 
 See [`data-lifecycle.md`](data-lifecycle.md) for the operational policy.
 
-## 8. Development checks
+## 10. Development checks
+
+### Station addresses
+
+When a provider supplies an address or administrative divisions, station RDF
+contains both `schema:address` and the compatible IMI terms `ic:住所`,
+`ic:都道府県`, `ic:都道府県コード`, `ic:市区町村`, and `ic:市区町村コード`.
+The converter does not guess an address from a station name. Coordinate-based
+enrichment is enabled for `fdsn-stations` and `jshis-flatfile` with
+`--enrich-addresses`:
+
+```bash
+earthquake-rdf-convert jshis-flatfile flatfile-v2024.zip \
+  --source-uri https://www.j-shis.bosai.go.jp/labs/ground-motion-flatfile/data/v2024/flatfile-v2024.zip \
+  --enrich-addresses \
+  --address-cache var/cache/gsi-addresses.json \
+  --address-request-interval 0.2
+```
+
+Only coordinates near Japan are sent to the GSI reverse geocoder. The returned
+municipality code is joined with the official `muni.js` table. Existing
+addresses are preserved. Results, source request URIs, and retrieval timestamps
+are cached by coordinate; repeated conversion requires no network request.
+Negative lookups are cached too. Keep a nonzero interval during large initial
+enrichment jobs to avoid excessive load on GSI services.
+
+Use `--clear-address-cache` together with `--enrich-addresses` to force a full
+refresh after a bad lookup or an administrative-boundary update. The old cache
+is retained as `gsi-addresses.json.backup-{UTC timestamp}` for recovery. Both
+the municipality table and coordinate results are reset.
+
+```bash
+earthquake-rdf-convert jshis-flatfile flatfile-v2024.zip \
+  --source-uri https://www.j-shis.bosai.go.jp/labs/ground-motion-flatfile/data/v2024/flatfile-v2024.zip \
+  --enrich-addresses --clear-address-cache \
+  --address-cache var/cache/gsi-addresses.json
+```
 
 ```bash
 python -m unittest discover -s tests -v

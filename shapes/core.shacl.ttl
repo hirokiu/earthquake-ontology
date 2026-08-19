@@ -1,5 +1,6 @@
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix jpe: <https://seismic.balog.jp/ontology/jp-earthquake.ttl#> .
+@prefix ic: <http://imi.go.jp/ns/core/rdf#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix schema: <http://schema.org/> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
@@ -31,7 +32,9 @@ jpe:StationShape a sh:NodeShape ;
     sh:targetClass jpe:observer ;
     sh:property [ sh:path jpe:stationIdentifier ; sh:minCount 1 ; sh:maxCount 1 ] ;
     sh:property [ sh:path schema:latitude ; sh:minCount 1 ; sh:maxCount 1 ; sh:minInclusive -90 ; sh:maxInclusive 90 ] ;
-    sh:property [ sh:path schema:longitude ; sh:minCount 1 ; sh:maxCount 1 ; sh:minInclusive -180 ; sh:maxInclusive 180 ] .
+    sh:property [ sh:path schema:longitude ; sh:minCount 1 ; sh:maxCount 1 ; sh:minInclusive -180 ; sh:maxInclusive 180 ] ;
+    sh:property [ sh:path schema:address ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ;
+    sh:property [ sh:path ic:住所 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] .
 
 jpe:DatasetSnapshotShape a sh:NodeShape ;
     sh:targetClass jpe:DatasetSnapshot ;

@@ -13,7 +13,7 @@ from rdflib import RDF, XSD, URIRef
 from rdflib import Graph
 from pyshacl import validate
 
-from earthquake_ontology.model import DatasetSnapshot, ParsedDataset, Station
+from earthquake_ontology.model import DatasetSnapshot, ParsedDataset, Station, StationAddress
 from earthquake_ontology.namespaces import JPE, PROV
 from earthquake_ontology.parsers.jma_intensity import HYPO_WIDTHS, OBS_WIDTHS, JmaIntensityParser
 from earthquake_ontology.rdf_builder import RdfBuilder
@@ -91,6 +91,10 @@ class JmaPipelineTest(unittest.TestCase):
                 latitude=Decimal("43.33"),
                 longitude=Decimal("146.09"),
                 source_uri="https://www.data.jma.go.jp/example/stations",
+                address=StationAddress(
+                    full_address="北海道石狩市", prefecture="北海道",
+                    prefecture_code="01", municipality="石狩市", municipality_code="01235",
+                ),
             )
         )
         graph = RdfBuilder().build_dataset(result)
@@ -99,6 +103,10 @@ class JmaPipelineTest(unittest.TestCase):
         self.assertIn((event, PROV.wasDerivedFrom, URIRef(self.source_uri)), graph)
         origin = graph.value(event, JPE.originTime)
         self.assertEqual(origin.datatype, XSD.dateTime)
+        station = URIRef("https://seismic.balog.jp/resource/sta-1670022")
+        self.assertEqual(str(graph.value(station, URIRef("http://schema.org/address"))), "北海道石狩市")
+        self.assertEqual(str(graph.value(station, URIRef("http://imi.go.jp/ns/core/rdf#都道府県"))), "北海道")
+        self.assertEqual(str(graph.value(station, URIRef("http://imi.go.jp/ns/core/rdf#市区町村コード"))), "01235")
         root = Path(__file__).parents[1]
         conforms, _, report = validate(
             graph,

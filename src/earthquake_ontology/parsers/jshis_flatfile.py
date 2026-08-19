@@ -10,7 +10,7 @@ from decimal import Decimal, InvalidOperation
 from pathlib import Path, PurePosixPath
 from urllib.parse import quote
 
-from ..model import Hypocenter, ParseIssue, ParsedDataset, Station, StrongMotionRecord
+from ..model import Hypocenter, ParseIssue, ParsedDataset, Station, StationAddress, StrongMotionRecord
 
 JST = timezone(timedelta(hours=9))
 BASE = "https://seismic.balog.jp/resource/jshis/"
@@ -83,6 +83,14 @@ class JshisFlatFileParser:
         for line, row in enumerate(self._rows(text), 2):
             try:
                 identifier = (row.get("siteid2") or row.get("site_code") or "").strip()
+                address_text = (row.get("address") or row.get("site_address") or "").strip()
+                address = StationAddress(
+                    full_address=address_text,
+                    prefecture=(row.get("prefecture") or row.get("pref_name") or "").strip() or None,
+                    prefecture_code=(row.get("prefecture_code") or row.get("pref_code") or "").strip() or None,
+                    municipality=(row.get("municipality") or row.get("city_name") or "").strip() or None,
+                    municipality_code=(row.get("municipality_code") or row.get("city_code") or "").strip() or None,
+                ) if address_text else None
                 result.stations.append(Station(
                     uri=BASE + "station/" + quote(identifier), identifier=identifier,
                     label_ja=(row.get("site_name") or "").strip() or None,
@@ -90,6 +98,7 @@ class JshisFlatFileParser:
                     elevation_m=_decimal(row.get("elevation")),
                     network=networks.get((row.get("obs_network_id") or "").strip(), row.get("obs_network_id")),
                     available_from=_date(row.get("start_date")), available_until=_date(row.get("end_date")),
+                    address=address,
                     source_uri=self.source_uri,
                 ))
             except (ValueError, InvalidOperation, TypeError) as exc:

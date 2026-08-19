@@ -67,6 +67,24 @@ class Observation:
 
 
 @dataclass(frozen=True)
+class StationAddress:
+    full_address: str
+    address_uri: str | None = None
+    prefecture: str | None = None
+    prefecture_code: str | None = None
+    municipality: str | None = None
+    municipality_code: str | None = None
+    country: str | None = None
+    language: str = "ja"
+
+    def __post_init__(self) -> None:
+        if not self.full_address.strip():
+            raise ValueError("full_address must not be empty")
+        if self.address_uri is not None:
+            _validate_uri(self.address_uri, "address_uri")
+
+
+@dataclass(frozen=True)
 class Station:
     uri: str
     identifier: str
@@ -79,6 +97,7 @@ class Station:
     network: str | None = None
     available_from: datetime | None = None
     available_until: datetime | None = None
+    address: StationAddress | None = None
 
     def __post_init__(self) -> None:
         _validate_uri(self.uri, "uri")

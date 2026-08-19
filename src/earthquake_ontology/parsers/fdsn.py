@@ -8,7 +8,7 @@ from pathlib import Path
 from urllib.parse import quote
 from xml.etree import ElementTree as ET
 
-from ..model import Hypocenter, ParseIssue, ParsedDataset, Station
+from ..model import Hypocenter, ParseIssue, ParsedDataset, Station, StationAddress
 
 
 def _local(tag: str) -> str:
@@ -135,6 +135,7 @@ class FdsnStationXmlParser:
                     station_code = (station.get("code") or "").strip()
                     identifier = f"{network_code}.{station_code}"
                     site = _child(station, "Site")
+                    address = self._site_address(site)
                     result.stations.append(Station(
                         uri="https://seismic.balog.jp/resource/sta-FDSN-" + quote(identifier),
                         identifier=identifier, network=network_code,
@@ -143,6 +144,7 @@ class FdsnStationXmlParser:
                         elevation_m=_decimal(station, "Elevation"),
                         available_from=_instant(station.get("startDate")) if station.get("startDate") else None,
                         available_until=_instant(station.get("endDate")) if station.get("endDate") else None,
+                        address=address,
                         source_uri=self.source_uri,
                     ))
                 except (ValueError, InvalidOperation, TypeError) as exc:
@@ -150,3 +152,24 @@ class FdsnStationXmlParser:
         if not result.stations:
             result.issues.append(ParseIssue(0, "no_stations", "StationXML contains no stations", ""))
         return result
+
+    @staticmethod
+    def _site_address(site) -> StationAddress | None:
+        if site is None:
+            return None
+        country = _text(site, "Country")
+        region = _text(site, "Region")
+        county = _text(site, "County")
+        town = _text(site, "Town")
+        components = [value for value in (country, region, county, town) if value]
+        if not components:
+            return None
+        is_japanese = (country or "").upper() in {"JP", "JPN", "JAPAN", "日本"}
+        full_address = "".join(components[1:] if is_japanese else components)
+        if not is_japanese:
+            full_address = ", ".join(reversed(components))
+        return StationAddress(
+            full_address=full_address, prefecture=region if is_japanese else None,
+            municipality=town or county if is_japanese else None,
+            country=country, language="ja" if is_japanese else "en",
+        )

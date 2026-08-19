@@ -53,6 +53,7 @@ validation, storage, and operational update procedures.
 | Command | Purpose |
 | --- | --- |
 | `earthquake-data-fetch` | Discover and immutably archive provider data |
+| `earthquake-data-organize` | Organize legacy files by filesystem creation date |
 | `earthquake-rdf-convert` | Convert provider formats to RDF/Turtle |
 | `earthquake-rdf-audit` | Stream-check generated Turtle for common defects |
 
@@ -83,6 +84,12 @@ python -m compileall -q src tests
 Publication must follow [`docs/data-lifecycle.md`](docs/data-lifecycle.md):
 archive the source, create and validate a new snapshot, back up the active graph,
 and replace the complete target graph.
+
+Generated output can be written as Turtle, N-Triples, or named-graph N-Quads.
+When the output path is omitted, files are stored below
+`data/YYYY-MM-DD/{converter}/{format}/`. N-Quads is convenient for a QLever
+index that preserves named graphs. Automatic filenames include both provider
+and dataset type, for example `usgs-fdsn-events-1960.nq`.
 
 ## License and attribution
 
