@@ -1,0 +1,16 @@
+PREFIX jpe: <https://seismic.balog.jp/ontology/jp-earthquake.ttl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+SELECT DISTINCT ?hypocenter ?origin ?station ?name ?calcShindo WHERE {
+  ?hypocenter a jpe:hypocenter ;
+               jpe:originTime ?origin ;
+               jpe:shindo ?shindo .
+  FILTER(xsd:dateTime(?origin) > "2018-01-01T00:00:00Z"^^xsd:dateTime)
+  FILTER(CONTAINS(xsd:string(?shindo), "震度5強"))
+  ?wave jpe:hasHypocenter ?hypocenter ;
+        jpe:observedBy ?station ;
+        jpe:calcShindo ?calcShindo .
+  FILTER(?calcShindo >= 4)
+  ?station rdfs:label ?name .
+}
+LIMIT 100

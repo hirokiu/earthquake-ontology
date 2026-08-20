@@ -1,0 +1,5 @@
+PREFIX jpe: <https://seismic.balog.jp/ontology/jp-earthquake.ttl#>
+SELECT ?hypocenter ?origin WHERE {
+  ?hypocenter a jpe:hypocenter ; jpe:originTime ?origin .
+}
+LIMIT 10

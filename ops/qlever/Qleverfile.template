@@ -1,0 +1,20 @@
+# Generated per blue/green slot by scripts/qlever-blue-green.sh.
+
+[data]
+NAME             = @NAME@
+DESCRIPTION      = Earthquake LOD production snapshot
+
+[index]
+INPUT_FILES      = data/*.nq
+CAT_INPUT_FILES  = cat ${INPUT_FILES}
+SETTINGS_JSON    = { "ascii-prefixes-only": false, "num-triples-per-batch": 100000 }
+
+[server]
+PORT               = @PORT@
+MEMORY_FOR_QUERIES = 16G
+CACHE_MAX_SIZE     = 8G
+TIMEOUT            = 120s
+
+[runtime]
+SYSTEM = docker
+IMAGE  = docker.io/adfreiburg/qlever:latest

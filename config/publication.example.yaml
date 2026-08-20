@@ -1,0 +1,63 @@
+# Copy to config/publication.yaml on the server. Do not put credentials here.
+source_config: config/sources.yaml
+state_directory: var/publication
+snapshot_directory: var/snapshots
+
+# Omit `sources` to check every enabled source. For a daily job, use a separate
+# config containing only mutable/current feeds; run the complete config weekly.
+# sources:
+#   - jma_daily_hypocenters
+#   - fdsn_events_usgs
+
+build_command:
+  - "{root}/.venv/bin/earthquake-rdf-snapshot"
+  - build
+  - --config
+  - "{root}/config/sources.yaml"
+  - --snapshot
+  - "{snapshot}"
+
+validation_commands:
+  - - "{root}/.venv/bin/earthquake-rdf-snapshot"
+    - validate
+    - --snapshot
+    - "{snapshot}"
+
+store:
+  strategy: blue_green
+  slot_ports:
+    blue: 7011
+    green: 7012
+  prepare_command:
+    - "{root}/scripts/qlever-blue-green.sh"
+    - prepare
+    - "{candidate_slot}"
+    - "{snapshot}"
+  start_command:
+    - "{root}/scripts/qlever-blue-green.sh"
+    - start
+    - "{candidate_slot}"
+    - "{snapshot}"
+  candidate_endpoint: "http://127.0.0.1:{candidate_port}"
+  activate_command:
+    - "{root}/scripts/qlever-blue-green.sh"
+    - activate
+    - "{candidate_slot}"
+    - "{snapshot}"
+  rollback_command:
+    - "{root}/scripts/qlever-blue-green.sh"
+    - activate
+    - "{candidate_slot}"
+    - "{snapshot}"
+  public_endpoint: https://seismic.balog.jp/sparql
+
+query_tests:
+  - name: hypocenters exist
+    query_file: config/smoke-queries/01-hypocenters.rq
+    minimum_rows: 1
+  - name: observations connect to stations and hypocenters
+    query_file: config/smoke-queries/02-observation-links.rq
+    minimum_rows: 1
+  - name: corrected published demonstration query
+    query_file: config/smoke-queries/03-published-demo.rq
+    minimum_rows: 1

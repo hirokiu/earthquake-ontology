@@ -20,6 +20,8 @@ earthquake-rdf-audit = "earthquake_ontology.audit:main"
 earthquake-rdf-convert = "earthquake_ontology.cli:main"
 earthquake-data-fetch = "earthquake_ontology.fetch_cli:main"
 earthquake-data-organize = "earthquake_ontology.organize_cli:main"
+earthquake-rdf-publish = "earthquake_ontology.publication_cli:main"
+earthquake-rdf-snapshot = "earthquake_ontology.snapshot_cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

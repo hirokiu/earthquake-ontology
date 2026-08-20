@@ -1,0 +1,9 @@
+PREFIX jpe: <https://seismic.balog.jp/ontology/jp-earthquake.ttl#>
+SELECT ?wave ?hypocenter ?station WHERE {
+  ?wave a jpe:observedWave ;
+        jpe:hasHypocenter ?hypocenter ;
+        jpe:observedBy ?station .
+  ?hypocenter a jpe:hypocenter .
+  ?station a jpe:observer .
+}
+LIMIT 10

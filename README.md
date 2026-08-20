@@ -56,6 +56,8 @@ validation, storage, and operational update procedures.
 | `earthquake-data-organize` | Organize legacy files by filesystem creation date |
 | `earthquake-rdf-convert` | Convert provider formats to RDF/Turtle |
 | `earthquake-rdf-audit` | Stream-check generated Turtle for common defects |
+| `earthquake-rdf-snapshot` | Rebuild a complete named-graph N-Quads snapshot |
+| `earthquake-rdf-publish` | Fetch, validate, test, and blue-green publish from cron |
 
 ## Repository structure / リポジトリ構成
 
@@ -84,6 +86,9 @@ python -m compileall -q src tests
 Publication must follow [`docs/data-lifecycle.md`](docs/data-lifecycle.md):
 archive the source, create and validate a new snapshot, back up the active graph,
 and replace the complete target graph.
+
+For a production clone, QLever blue-green deployment, nginx switching, rollback,
+and cron configuration, see [`docs/PRODUCTION_UPDATE.ja.md`](docs/PRODUCTION_UPDATE.ja.md).
 
 Generated output can be written as Turtle, N-Triples, or named-graph N-Quads.
 When the output path is omitted, files are stored below
