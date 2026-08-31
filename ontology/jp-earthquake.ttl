@@ -58,6 +58,22 @@ jpe:StrongMotionRecord a owl:Class ;
     rdfs:comment "観測点で得られた強震波形またはそこから算出した主要指標を表す。"@ja ;
     rdfs:subClassOf sosa:Observation .
 
+jpe:EarthquakeActivity a owl:Class ;
+    rdfs:label "地震活動"@ja , "earthquake activity"@en ;
+    rdfs:subClassOf schema:EventSeries .
+
+jpe:NamedEarthquakeActivity a owl:Class ;
+    rdfs:label "命名地震活動"@ja , "named earthquake activity"@en ;
+    rdfs:subClassOf jpe:EarthquakeActivity .
+
+jpe:EarthquakeActivityMembership a owl:Class ;
+    rdfs:label "地震活動所属"@ja , "earthquake activity membership"@en ;
+    rdfs:subClassOf prov:Entity .
+
+jpe:DisasterCase a owl:Class ;
+    rdfs:label "災害事例"@ja , "disaster case"@en ;
+    rdfs:subClassOf schema:Event .
+
 # Datatype properties used by the published JMA and FDSN datasets
 jpe:originTime a owl:DatatypeProperty ;
     rdfs:label "オリジンタイム"@ja , "origin time"@en ;
@@ -135,6 +151,39 @@ jpe:instrumentalIntensity a owl:DatatypeProperty ; rdfs:label "計測震度"@ja 
 jpe:faultDistance a owl:DatatypeProperty ; rdfs:label "断層最短距離 (km)"@ja ; rdfs:domain jpe:StrongMotionRecord ; rdfs:range xsd:decimal .
 
 # Object properties
+jpe:namedBy a owl:ObjectProperty ; rdfs:domain jpe:NamedEarthquakeActivity ; rdfs:range prov:Agent .
+jpe:hasMemberEarthquake a owl:ObjectProperty ; rdfs:domain jpe:EarthquakeActivity ; rdfs:range jpe:earthquake ; owl:inverseOf jpe:isMemberOfEarthquakeActivity ; rdfs:subPropertyOf schema:subEvent .
+jpe:isMemberOfEarthquakeActivity a owl:ObjectProperty ; rdfs:domain jpe:earthquake ; rdfs:range jpe:EarthquakeActivity ; rdfs:subPropertyOf schema:superEvent .
+jpe:representativeEarthquake a owl:ObjectProperty ; rdfs:domain jpe:EarthquakeActivity ; rdfs:range jpe:earthquake .
+jpe:hasMembership a owl:ObjectProperty ; rdfs:domain jpe:EarthquakeActivity ; rdfs:range jpe:EarthquakeActivityMembership .
+jpe:earthquakeActivity a owl:ObjectProperty ; rdfs:domain jpe:EarthquakeActivityMembership ; rdfs:range jpe:EarthquakeActivity .
+jpe:memberEarthquake a owl:ObjectProperty ; rdfs:domain jpe:EarthquakeActivityMembership ; rdfs:range jpe:earthquake .
+jpe:membershipStatus a owl:ObjectProperty ; rdfs:domain jpe:EarthquakeActivityMembership ; rdfs:range skos:Concept .
+jpe:membershipRole a owl:ObjectProperty ; rdfs:domain jpe:EarthquakeActivityMembership ; rdfs:range skos:Concept .
+jpe:membershipMethod a owl:ObjectProperty ; rdfs:domain jpe:EarthquakeActivityMembership .
+jpe:causedDisaster a owl:ObjectProperty ; rdfs:domain jpe:EarthquakeActivity ; rdfs:range jpe:DisasterCase .
+
+jpe:Candidate a skos:Concept ; skos:prefLabel "候補"@ja .
+jpe:Confirmed a skos:Concept ; skos:prefLabel "確認済み"@ja .
+jpe:Rejected a skos:Concept ; skos:prefLabel "棄却"@ja .
+jpe:MainShock a skos:Concept .
+jpe:Foreshock a skos:Concept .
+jpe:Aftershock a skos:Concept .
+jpe:SwarmMember a skos:Concept .
+jpe:Unclassified a skos:Concept .
+
+jpe:confidenceScore a owl:DatatypeProperty ; rdfs:domain jpe:EarthquakeActivityMembership ; rdfs:range xsd:decimal .
+jpe:activityType a owl:ObjectProperty ; rdfs:domain jpe:EarthquakeActivity ; rdfs:range skos:Concept .
+jpe:SingleEarthquakeType a skos:Concept .
+jpe:SeriesActivityType a skos:Concept .
+jpe:SwarmEarthquakeType a skos:Concept .
+jpe:DistantEarthquakeTsunamiType a skos:Concept .
+jpe:UncertainActivityType a skos:Concept .
+jpe:catalogVersion a owl:DatatypeProperty .
+jpe:ruleVersion a owl:DatatypeProperty .
+jpe:timeWindow a owl:DatatypeProperty .
+jpe:spatialWindow a owl:DatatypeProperty .
+jpe:threshold a owl:DatatypeProperty .
 jpe:hasHypocenter a owl:ObjectProperty ;
     rdfs:label "震源"@ja , "has hypocenter"@en ;
     rdfs:domain [ a owl:Class ; owl:unionOf ( jpe:earthquake jpe:observedWave jpe:StrongMotionRecord ) ] ;

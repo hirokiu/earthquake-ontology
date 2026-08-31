@@ -1,0 +1,8 @@
+{
+  "retrieved_at": "2026-08-31T04:05:21Z",
+  "artifacts": [
+    {"url": "https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html", "status_code": 200, "content_type": "text/html; charset=UTF-8", "etag": "\"db5abf5d9ed0f39e51db01b97453f669\"", "last_modified": "Fri, 14 Aug 2026 08:06:20 GMT", "sha256": "e32162119ec9b401a491cd2e3b13d7e76a2aa578943e1bf81611eab823d51668", "bytes": 24705, "path": "meishou_ichiran.html"},
+    {"url": "https://www.jma.go.jp/jma/kishou/know/meishou/meishou.html", "status_code": 200, "content_type": "text/html; charset=UTF-8", "sha256": "51a43b40e1caf69f6d3c7c53763a7a4baed8a7a74472e65d5a5df58b1cd79ff3", "bytes": 10089, "path": "meishou.html"},
+    {"url": "https://www.jma.go.jp/jma/press/2401/01b/202401011810_2.html", "status_code": 200, "content_type": "text/html; charset=UTF-8", "sha256": "5a0abcde7e4a6aac7e26277adcdb8fa91d3e40870b4088a83a5b03643ff09ef5", "bytes": 6961, "path": "202401011810_2.html"}
+  ]
+}

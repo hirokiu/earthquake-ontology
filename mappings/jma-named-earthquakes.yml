@@ -1,0 +1,10 @@
+version: 1
+source: https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html
+table_heading: 地震現象
+columns: [番号, 名称, 期間・現象等, 地域独自の名称等・主な被害]
+membership_rules:
+  official-list-v1: {status: Confirmed, evidence: official-enumeration}
+  single-date-v1: {status: Candidate, time_window: same-jst-calendar-date, confidence: 0.50}
+  activity-window-v1: {status: Candidate, requires: [versioned-time-window, versioned-spatial-window, threshold, catalog-version]}
+special_cases:
+  令和6年能登半島地震: {type: series, start: 2020-12, rule: activity-window-v1}

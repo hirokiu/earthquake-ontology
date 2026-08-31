@@ -1,0 +1,327 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix jpe: <https://seismic.balog.jp/ontology/jp-earthquake.ttl#> .
+@prefix schema: <http://schema.org/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://seismic.balog.jp/resource/named-earthquake/1968-0ccb6b967fdf0c02> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "1968年十勝沖地震"@ja ;
+    schema:startDate "1968-05-16"^^xsd:date ;
+    skos:prefLabel "1968年十勝沖地震"@ja ;
+    jpe:activityType jpe:SingleEarthquakeType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/1968-f6e2021e388e0d47> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "1968年日向灘地震"@ja ;
+    schema:startDate "1968-04-01"^^xsd:date ;
+    skos:prefLabel "1968年日向灘地震"@ja ;
+    jpe:activityType jpe:SingleEarthquakeType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/1972-0b407b38211afd95> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "1972年12月4日八丈島東方沖地震"@ja ;
+    schema:startDate "1972-12-04"^^xsd:date ;
+    skos:prefLabel "1972年12月4日八丈島東方沖地震"@ja ;
+    jpe:activityType jpe:SingleEarthquakeType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/1973-55c1ec7a5f0a05e5> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "1973年6月17日根室半島沖地震"@ja ;
+    schema:startDate "1973-06-17"^^xsd:date ;
+    skos:prefLabel "1973年6月17日根室半島沖地震"@ja ;
+    jpe:activityType jpe:SingleEarthquakeType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/1974-a470d62b60e06025> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "1974年伊豆半島沖地震"@ja ;
+    schema:startDate "1974-05-09"^^xsd:date ;
+    skos:prefLabel "1974年伊豆半島沖地震"@ja ;
+    jpe:activityType jpe:SingleEarthquakeType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/1978-b8c6c0a53d1296cf> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "1978年宮城県沖地震"@ja ;
+    schema:startDate "1978-06-12"^^xsd:date ;
+    skos:prefLabel "1978年宮城県沖地震"@ja ;
+    jpe:activityType jpe:SingleEarthquakeType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/1978-b95c9c5d835f9e5a> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "1978年伊豆大島近海の地震"@ja ;
+    schema:startDate "1978-01-14"^^xsd:date ;
+    skos:prefLabel "1978年伊豆大島近海の地震"@ja ;
+    jpe:activityType jpe:SingleEarthquakeType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/1982-030067f857e7b1fe> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "昭和57年(1982年)浦河沖地震"@ja ;
+    schema:startDate "1982-03-21"^^xsd:date ;
+    skos:prefLabel "昭和57年(1982年)浦河沖地震"@ja ;
+    jpe:activityType jpe:SingleEarthquakeType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/1983-17e8e5cddcd52839> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "昭和58年(1983年)日本海中部地震"@ja ;
+    schema:startDate "1983-05-26"^^xsd:date ;
+    skos:prefLabel "昭和58年(1983年)日本海中部地震"@ja ;
+    jpe:activityType jpe:SingleEarthquakeType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/1984-a30fdc5e7132a0fe> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "昭和59年(1984年)長野県西部地震"@ja ;
+    schema:startDate "1984-09-14"^^xsd:date ;
+    skos:altLabel "御嶽崩れ"@ja ;
+    skos:prefLabel "昭和59年(1984年)長野県西部地震"@ja ;
+    jpe:activityType jpe:SingleEarthquakeType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/1993-6b65248a176de942> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "平成5年(1993年)北海道南西沖地震"@ja ;
+    schema:startDate "1993-07-12"^^xsd:date ;
+    skos:altLabel "奥尻島の地震"@ja,
+        "奥尻島の津波"@ja ;
+    skos:prefLabel "平成5年(1993年)北海道南西沖地震"@ja ;
+    jpe:activityType jpe:SingleEarthquakeType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/1993-768a64536857f010> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "平成5年(1993年)釧路沖地震"@ja ;
+    schema:startDate "1993-01-15"^^xsd:date ;
+    skos:prefLabel "平成5年(1993年)釧路沖地震"@ja ;
+    jpe:activityType jpe:SingleEarthquakeType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/1994-1e0380a7305b37fb> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "平成6年(1994年)北海道東方沖地震"@ja ;
+    schema:startDate "1994-10-04"^^xsd:date ;
+    skos:prefLabel "平成6年(1994年)北海道東方沖地震"@ja ;
+    jpe:activityType jpe:SingleEarthquakeType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/1994-daa8e8fccabb5eb1> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "平成6年(1994年)三陸はるか沖地震"@ja ;
+    schema:startDate "1994-12-28"^^xsd:date ;
+    skos:prefLabel "平成6年(1994年)三陸はるか沖地震"@ja ;
+    jpe:activityType jpe:SingleEarthquakeType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/1995-8bdbcaf41a1c6c5d> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "平成7年(1995年)兵庫県南部地震"@ja ;
+    schema:startDate "1995-01-17"^^xsd:date ;
+    skos:prefLabel "平成7年(1995年)兵庫県南部地震"@ja ;
+    jpe:activityType jpe:SingleEarthquakeType ;
+    jpe:causedDisaster <https://seismic.balog.jp/resource/disaster/named-03df12cd16281e27> ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/2000-85fb373348ecce57> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "平成12年(2000年)鳥取県西部地震"@ja ;
+    schema:startDate "2000-10-06"^^xsd:date ;
+    skos:prefLabel "平成12年(2000年)鳥取県西部地震"@ja ;
+    jpe:activityType jpe:SingleEarthquakeType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/2001-80695a3ea00164f5> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "平成13年(2001年)芸予地震"@ja ;
+    schema:startDate "2001-03-24"^^xsd:date ;
+    skos:prefLabel "平成13年(2001年)芸予地震"@ja ;
+    jpe:activityType jpe:SingleEarthquakeType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/2003-eb66bfac6fd0fb1a> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "平成15年(2003年)十勝沖地震"@ja ;
+    schema:startDate "2003-09-26"^^xsd:date ;
+    skos:prefLabel "平成15年(2003年)十勝沖地震"@ja ;
+    jpe:activityType jpe:SingleEarthquakeType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/2004-a974dfa2d0380907> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "平成16年(2004年)新潟県中越地震"@ja ;
+    schema:startDate "2004-10-23"^^xsd:date ;
+    skos:prefLabel "平成16年(2004年)新潟県中越地震"@ja ;
+    jpe:activityType jpe:SingleEarthquakeType ;
+    jpe:causedDisaster <https://seismic.balog.jp/resource/disaster/named-31bdafec22609cc1> ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/2007-4c0f33e90a3c4667> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "平成19年(2007年)能登半島地震"@ja ;
+    schema:startDate "2007-03-25"^^xsd:date ;
+    skos:prefLabel "平成19年(2007年)能登半島地震"@ja ;
+    jpe:activityType jpe:SingleEarthquakeType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/2007-eba4c47def7060c2> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "平成19年(2007年)新潟県中越沖地震"@ja ;
+    schema:startDate "2007-07-16"^^xsd:date ;
+    skos:prefLabel "平成19年(2007年)新潟県中越沖地震"@ja ;
+    jpe:activityType jpe:SingleEarthquakeType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/2008-637cc99a7cc8545a> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "平成20年(2008年)岩手・宮城内陸地震"@ja ;
+    schema:startDate "2008-06-14"^^xsd:date ;
+    skos:prefLabel "平成20年(2008年)岩手・宮城内陸地震"@ja ;
+    jpe:activityType jpe:SingleEarthquakeType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/2011-c1fb4c488db24685> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "平成23年(2011年)東北地方太平洋沖地震"@ja ;
+    schema:startDate "2011-03-11"^^xsd:date ;
+    skos:prefLabel "平成23年(2011年)東北地方太平洋沖地震"@ja ;
+    jpe:activityType jpe:SingleEarthquakeType ;
+    jpe:causedDisaster <https://seismic.balog.jp/resource/disaster/named-2441cf1712e0f8ae> ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/2016-d561254a00de8815> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "平成28年(2016年)熊本地震"@ja ;
+    schema:startDate "2016-04-14"^^xsd:date ;
+    skos:prefLabel "平成28年(2016年)熊本地震"@ja ;
+    jpe:activityType jpe:SeriesActivityType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/named-11c97bfe9dbcc0f7> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "新潟地震"@ja ;
+    schema:startDate "1964-06-16"^^xsd:date ;
+    skos:prefLabel "新潟地震"@ja ;
+    jpe:activityType jpe:SingleEarthquakeType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/named-1d16cfbf642ebc56> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "えびの地震"@ja ;
+    schema:startDate "1968-02-21"^^xsd:date ;
+    skos:prefLabel "えびの地震"@ja ;
+    jpe:activityType jpe:SeriesActivityType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/named-1dcd28b2de483cdb> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "越前岬沖地震"@ja ;
+    schema:startDate "1963-03-27"^^xsd:date ;
+    skos:prefLabel "越前岬沖地震"@ja ;
+    jpe:activityType jpe:SingleEarthquakeType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/named-222850dd2a723474> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "平成30年北海道胆振東部地震"@ja ;
+    schema:startDate "2018-09-06"^^xsd:date ;
+    skos:prefLabel "平成30年北海道胆振東部地震"@ja ;
+    jpe:activityType jpe:SingleEarthquakeType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/named-3f76f45fda08c583> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "松代群発地震"@ja ;
+    schema:startDate "1965-08-03"^^xsd:date ;
+    skos:prefLabel "松代群発地震"@ja ;
+    jpe:activityType jpe:SwarmEarthquakeType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/named-63e803372e5c229b> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "令和6年能登半島地震"@ja ;
+    schema:startDate "2020-12"^^xsd:gYearMonth ;
+    skos:altLabel "令和5年奥能登地震"@ja ;
+    skos:prefLabel "令和6年能登半島地震"@ja ;
+    jpe:activityType jpe:SeriesActivityType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/named-6b5ecadd04c1a4c4> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "チリ地震津波"@ja ;
+    schema:startDate "1960-05-23"^^xsd:date ;
+    skos:prefLabel "チリ地震津波"@ja ;
+    jpe:activityType jpe:DistantEarthquakeTsunamiType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/named-93cc1002eacd037c> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "北美濃地震"@ja ;
+    schema:startDate "1961-08-19"^^xsd:date ;
+    skos:prefLabel "北美濃地震"@ja ;
+    jpe:activityType jpe:SingleEarthquakeType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/named-de7e6a6de65427f6> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "宮城県北部地震"@ja ;
+    schema:startDate "1962-04-30"^^xsd:date ;
+    skos:prefLabel "宮城県北部地震"@ja ;
+    jpe:activityType jpe:SingleEarthquakeType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/named-earthquake/named-efbc8df05ab2b52e> a schema:EventSeries,
+        jpe:NamedEarthquakeActivity ;
+    dcterms:source <https://www.jma.go.jp/jma/kishou/know/meishou/meishou_ichiran.html> ;
+    schema:name "令和8年熊本地震"@ja ;
+    schema:startDate "2026-07-28"^^xsd:date ;
+    skos:prefLabel "令和8年熊本地震"@ja ;
+    jpe:activityType jpe:SingleEarthquakeType ;
+    jpe:namedBy <https://www.jma.go.jp/jma/> .
+
+<https://seismic.balog.jp/resource/disaster/named-03df12cd16281e27> a jpe:DisasterCase ;
+    schema:name "阪神・淡路大震災"@ja .
+
+<https://seismic.balog.jp/resource/disaster/named-2441cf1712e0f8ae> a jpe:DisasterCase ;
+    schema:name "東日本大震災"@ja .
+
+<https://seismic.balog.jp/resource/disaster/named-31bdafec22609cc1> a jpe:DisasterCase ;
+    schema:name "新潟県中越大震災"@ja .

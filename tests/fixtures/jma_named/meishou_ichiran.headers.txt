@@ -1,0 +1,23 @@
+HTTP/2 200 
+content-type: text/html; charset=UTF-8
+content-length: 24705
+date: Mon, 31 Aug 2026 04:04:57 GMT
+last-modified: Fri, 14 Aug 2026 08:06:20 GMT
+etag: "db5abf5d9ed0f39e51db01b97453f669"
+x-amz-server-side-encryption: AES256
+cache-control: max-age=600
+accept-ranges: bytes
+server: AmazonS3
+via: 1.1 c383634e01fa17a4ab3a0d27cbdf5f0c.cloudfront.net (CloudFront)
+x-xss-protection: 1; mode=block
+referrer-policy: strict-origin-when-cross-origin
+content-security-policy: script-src 'self' 'unsafe-inline' 'unsafe-eval' www.jma.go.jp www.jma-net.go.jp js.jma.go.jp www.data.jma.go.jp ds.data.jma.go.jp www.google.com www.gstatic.com jma.genieesspv.jp pagead2.googlesyndication.com code.jquery.com ajaxzip3.github.io cdn.jsdelivr.net ajax.aspnetcdn.com code.createjs.com unpkg.com cdnjs.cloudflare.com ajax.googleapis.com platform.twitter.com github.githubassets.com maps.gsi.go.jp img.gsspat.jp; frame-ancestors 'self' www.mlit.go.jp www.data.jma.go.jp ds.data.jma.go.jp www.jma-net.go.jp www.pref.tokushima.lg.jp www.cgr.mlit.go.jp river-bosai.ktr.mlit.go.jp mie-mizubosai.go.jp sim.mie-mizubosai.go.jp mobile.mie-mizubosai.go.jp yoshino-drs.skr.mlit.go.jp view.mie-mizubosai.cbr.mlit.go.jp sim.mie-mizubosai.cbr.mlit.go.jp mobile.mie-mizubosai.cbr.mlit.go.jp
+x-content-type-options: nosniff
+strict-transport-security: max-age=31536000; preload
+vary: Origin
+access-control-allow-headers: X-Requested-With
+access-control-allow-origin: *
+x-cache: Miss from cloudfront
+x-amz-cf-pop: NRT20-P2
+x-amz-cf-id: 56BCcmiJND0dHRqBOdqqcywPeQdIDeI0lcpLTLVDNAUQkdfsDXO_bw==
+

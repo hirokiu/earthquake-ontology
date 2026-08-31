@@ -1,0 +1,29 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix jpe: <https://seismic.balog.jp/ontology/jp-earthquake.ttl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix schema: <http://schema.org/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+jpe:NamedEarthquakeActivityShape a sh:NodeShape ;
+  sh:targetClass jpe:NamedEarthquakeActivity ;
+  sh:property [ sh:path schema:name ; sh:minCount 1 ; sh:maxCount 1 ; sh:languageIn ( "ja" ) ; sh:uniqueLang true ] ;
+  sh:property [ sh:path jpe:namedBy ; sh:minCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path dcterms:source ; sh:minCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:sparql [ sh:message "終了日時は開始日時より前にできません。"@ja ; sh:select "PREFIX schema: <http://schema.org/> SELECT $this WHERE { $this schema:startDate ?s ; schema:endDate ?e . FILTER (?e < ?s) }" ] ;
+  sh:sparql [ sh:message "災害名称を地震活動の名称・別名へ混在させられません。"@ja ; sh:select "PREFIX schema: <http://schema.org/> PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT $this WHERE { $this (schema:name|skos:altLabel) ?n . FILTER (str(?n) IN (\"阪神・淡路大震災\", \"東日本大震災\", \"新潟県中越大震災\")) }" ] .
+
+jpe:EarthquakeActivityMembershipShape a sh:NodeShape ;
+  sh:targetClass jpe:EarthquakeActivityMembership ;
+  sh:property [ sh:path jpe:earthquakeActivity ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path jpe:memberEarthquake ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path jpe:membershipStatus ; sh:minCount 1 ; sh:maxCount 1 ; sh:in ( jpe:Candidate jpe:Confirmed jpe:Rejected ) ] ;
+  sh:property [ sh:path jpe:membershipMethod ; sh:minCount 1 ; sh:maxCount 1 ] ;
+  sh:property [ sh:path dcterms:source ; sh:minCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path jpe:confidenceScore ; sh:minInclusive 0 ; sh:maxInclusive 1 ; sh:datatype xsd:decimal ] ;
+  sh:sparql [ sh:message "Candidate/Rejected membership must not assert a confirmed containment relation."@en ; sh:select "PREFIX jpe: <https://seismic.balog.jp/ontology/jp-earthquake.ttl#> PREFIX schema: <http://schema.org/> SELECT $this WHERE { $this jpe:membershipStatus ?status ; jpe:earthquakeActivity ?a ; jpe:memberEarthquake ?e . FILTER (?status != jpe:Confirmed) { ?a jpe:hasMemberEarthquake ?e } UNION { ?a schema:subEvent ?e } UNION { ?e jpe:isMemberOfEarthquakeActivity ?a } UNION { ?e schema:superEvent ?a } }" ] .
+
+jpe:ConfirmedContainmentShape a sh:NodeShape ;
+  sh:targetSubjectsOf jpe:hasMemberEarthquake ;
+  sh:sparql [ sh:message "確定包含関係には対応するConfirmed membershipが必要です。"@ja ; sh:select "PREFIX jpe: <https://seismic.balog.jp/ontology/jp-earthquake.ttl#> SELECT $this WHERE { $this jpe:hasMemberEarthquake ?e . FILTER NOT EXISTS { ?m a jpe:EarthquakeActivityMembership ; jpe:earthquakeActivity $this ; jpe:memberEarthquake ?e ; jpe:membershipStatus jpe:Confirmed . } }" ] .

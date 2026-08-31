@@ -1,0 +1,9 @@
+PREFIX schema: <http://schema.org/>
+SELECT ?start (COUNT(?subEvent) AS ?subEvents)
+WHERE {
+  GRAPH <https://seismic.balog.jp/graph/jma/named-earthquakes/20260831> {
+    ?activity schema:name "令和6年能登半島地震"@ja ; schema:startDate ?start .
+    OPTIONAL { ?activity schema:subEvent ?subEvent }
+  }
+}
+GROUP BY ?start

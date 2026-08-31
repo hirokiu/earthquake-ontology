@@ -1,0 +1,16 @@
+PREFIX jpe: <https://seismic.balog.jp/ontology/jp-earthquake.ttl#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+SELECT
+  (COUNT(DISTINCT ?membership) AS ?memberships)
+  (COUNT(DISTINCT ?confirmed) AS ?confirmedRelations)
+  (COUNT(DISTINCT ?badActivity) AS ?disasterLabelViolations)
+WHERE {
+  GRAPH <https://seismic.balog.jp/graph/jma/named-earthquakes/20260831> {
+    OPTIONAL { ?membership a jpe:EarthquakeActivityMembership }
+    OPTIONAL { ?activity jpe:hasMemberEarthquake ?confirmed }
+    OPTIONAL {
+      ?badActivity a jpe:NamedEarthquakeActivity ; skos:altLabel ?label .
+      FILTER(CONTAINS(STR(?label), "大震災"))
+    }
+  }
+}
